@@ -1,4 +1,4 @@
-# GamePrototype
+# Game Prototype
 Game prototype for CS 6457 Video Game Design.
 
 ## Controls

@@ -9,10 +9,10 @@ public class CameraController : MonoBehaviour
 
     public float pitchSpeed = 8;
     public float yawSpeed = 90;
-    public float pitchAdjustment = -25;
+    public float pitchAdjustment = -15;
 
     [Tooltip("How many meters above the head of player to place the camera.")]
-    public float elevation = 5;
+    public float elevation = 3;
 
     private bool playMode = true;
 

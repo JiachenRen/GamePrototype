@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using static UnityEngine.InputSystem.InputAction;
 
+[RequireComponent(typeof(GroundCheck))]
 public class PlayerController : MonoBehaviour
 {
     public float jumpForceMultiplier = 3;
@@ -9,15 +10,8 @@ public class PlayerController : MonoBehaviour
 
     private Animator anim;
     private Rigidbody rb;
+    private GroundCheck check;
 
-    private int groundContactCount = 0;
-    private bool airborne
-    {
-        get
-        {
-            return groundContactCount <= 0;
-        }
-    }
     private bool jumpStarted = false;
     private bool accelerating = false;
     private Vector3 vel = Vector3.zero;
@@ -27,6 +21,7 @@ public class PlayerController : MonoBehaviour
     {
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
+        check = GetComponent<GroundCheck>();
     }
 
     // Update is called once per frame
@@ -97,22 +92,10 @@ public class PlayerController : MonoBehaviour
     public void OnCollisionEnter(Collision collision)
     {
 
-        if (collision.gameObject.tag == "Ground")
-        {
-            groundContactCount++;
-        }
-        if (jumpStarted && !airborne) 
+        if (jumpStarted && !check.Airborne) 
         { 
             jumpStarted = false;
             anim.SetTrigger("Land");
-        }
-    }
-
-    public void OnCollisionExit(Collision collision)
-    {
-        if (collision.gameObject.tag == "Ground")
-        {
-            groundContactCount--;
         }
     }
 }

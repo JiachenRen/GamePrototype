@@ -7,7 +7,6 @@ public class ForestGenerator : MonoBehaviour
     // Start is called before the first frame update
 
     public Ground ground;
-    public GameObject water;
     public List<GameObject> trees;
     public int treesToSpawn = 100;
 
@@ -31,7 +30,7 @@ public class ForestGenerator : MonoBehaviour
             if (ground.GetComponent<MeshCollider>().Raycast(ray, out hit, ground.maxTerrainHeight * 2))
             {
                 var y = hit.point.y;
-                if (y > water.transform.position.y)
+                if (y > ground.waterPlane.transform.position.y)
                 {
                     var newTree = Instantiate(tree, new Vector3(x, y, z), rotation);
                     newTree.AddComponent<MeshCollider>();

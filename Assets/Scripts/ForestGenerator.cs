@@ -8,13 +8,47 @@ public class ForestGenerator : MonoBehaviour
 
     public Ground ground;
     public List<GameObject> trees;
+    public Material wind;
+    public bool useWind = true;
     public int treesToSpawn = 100;
 
+    [SerializeField, HideInInspector]
+    private GameObject treesRoot;
+
     void Start()
+    {
+        SpawnTrees();
+    }
+
+    private void OnValidate()
+    {
+        SpawnTrees();
+    }
+
+    private void SpawnTrees()
     {
         var bounds = ground.GetComponent<Renderer>().bounds;
         var width = bounds.size.x;
         var height = bounds.size.z;
+
+        // Work-around for generated trees to show in both play and edit mode.
+        if (treesRoot != null)
+        {
+            var treesRoot = this.treesRoot;
+            if (Application.isPlaying)
+            {
+                Destroy(treesRoot);
+            } else
+            {
+                UnityEditor.EditorApplication.delayCall += () =>
+                {
+                    DestroyImmediate(treesRoot);
+                };
+            }
+        }
+        treesRoot = new GameObject("Trees");
+        treesRoot.transform.parent = transform;
+        
 
         for (int i = 0; i < treesToSpawn; i++)
         {
@@ -34,6 +68,9 @@ public class ForestGenerator : MonoBehaviour
                 {
                     var newTree = Instantiate(tree, new Vector3(x, y, z), rotation);
                     newTree.AddComponent<MeshCollider>();
+                    newTree.transform.parent = treesRoot.transform;
+                    Material material = newTree.GetComponent<MeshRenderer>().sharedMaterial;
+                    material.shader = useWind ? wind.shader : Shader.Find("Standard");
                 }
             }
         }

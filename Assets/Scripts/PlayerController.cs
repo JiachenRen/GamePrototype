@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour
     private Vector3 vel = Vector3.zero;
 
     private int attackIdx = 0;
+    private int skillQIdx = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -34,7 +35,6 @@ public class PlayerController : MonoBehaviour
         transform.LookAt(anchor);
         var r = transform.rotation.eulerAngles;
         transform.rotation = Quaternion.Euler(0, r.y , r.z);
-        
     }
 
     private void OnAnimatorMove()

@@ -16,6 +16,8 @@ public class PlayerController : MonoBehaviour
     private bool accelerating = false;
     private Vector3 vel = Vector3.zero;
 
+    private int attackIdx = 0;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -37,8 +39,12 @@ public class PlayerController : MonoBehaviour
 
     private void OnAnimatorMove()
     {
-        rb.MovePosition(anim.rootPosition);
-        rb.MoveRotation(anim.rootRotation);
+        var stateInfo = anim.GetCurrentAnimatorStateInfo(0);
+        if (!stateInfo.IsTag("No Root Motion"))
+        {
+            rb.MovePosition(anim.rootPosition);
+            rb.MoveRotation(anim.rootRotation);
+        }
     }
 
     public void OnMove(CallbackContext ctx)
@@ -60,11 +66,7 @@ public class PlayerController : MonoBehaviour
     {
         if (jumpStarted) return;
         jumpStarted = true;
-        var forward = transform.forward;
-        var force = new Vector3(forward.x * rb.mass * jumpForceMultiplier, forward.y, forward.z * rb.mass * jumpForceMultiplier);
-        var forcePerp = new Vector3(force.z, force.y, -force.x);
-        Debug.DrawRay(transform.position, force, Color.red, 2);
-        force = force * vel.y + forcePerp * vel.x;
+        var force = ForwardForce(jumpForceMultiplier);
         if (accelerating)
         {
             force.Scale(new Vector3(2f, 0, 2f));
@@ -72,6 +74,41 @@ public class PlayerController : MonoBehaviour
         force.y += 10 * rb.mass;
         rb.AddForce(force, ForceMode.Impulse);
         anim.SetTrigger("Jump");
+    }
+
+    public void OnLeftMouseClick(CallbackContext ctx)
+    {
+        if (ctx.performed && CanPerformAction())
+        {
+            // Alternate between left and right punches.
+            var form = (attackIdx % 2) == 0 ? 2 : 5;
+            attackIdx++;
+            anim.SetFloat("Attack Form", form);
+            anim.SetTrigger("Attack");
+        }
+    }
+
+    public void OnSkillQ(CallbackContext ctx)
+    {
+        if (ctx.started && CanPerformAction())
+        {
+            anim.SetTrigger("Skill Q");
+        }
+    }
+
+    private Vector3 ForwardForce(float forceMultiplier)
+    {
+        var forward = transform.forward;
+        var force = new Vector3(forward.x * rb.mass * forceMultiplier, forward.y, forward.z * rb.mass * forceMultiplier);
+        var forcePerp = new Vector3(force.z, force.y, -force.x);
+        force = force * vel.y + forcePerp * vel.x;
+        return force;
+    }
+
+    private bool CanPerformAction()
+    {
+        var stateInfo = anim.GetCurrentAnimatorStateInfo(0);
+        return stateInfo.IsTag("Idle") && !anim.IsInTransition(0);
     }
 
     void FootL()
@@ -85,6 +122,11 @@ public class PlayerController : MonoBehaviour
     }
 
     void Land()
+    {
+
+    }
+
+    void Hit()
     {
 
     }

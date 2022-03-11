@@ -14,6 +14,9 @@ public class CameraController : MonoBehaviour
     [Tooltip("How many meters above the head of player to place the camera.")]
     public float elevation = 5;
 
+    [Tooltip("How far away from the player to place the camera.")]
+    public float distance = 10;
+
     private bool playMode = true;
 
     // Horizontal rotation offset
@@ -33,7 +36,7 @@ public class CameraController : MonoBehaviour
     void Update()
     {
         var rotation = Quaternion.Euler(0, yawOffset * yawSpeed, 0);
-        var positionOffset = new Vector3(-rotation.y * 5, elevation, -rotation.w * 5);
+        var positionOffset = new Vector3(-rotation.y * distance, elevation, -rotation.w * distance);
         transform.position = player.transform.position + positionOffset;
         transform.LookAt(player.transform.position);
         var r = transform.rotation.eulerAngles;

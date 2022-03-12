@@ -33,6 +33,19 @@ public abstract class Forest : MonoBehaviour
         {
             root = new GameObject("ForestRoot");
             root.transform.parent = transform;
+        } else
+        {
+            foreach (Transform t in transform)
+            {
+                if (t.gameObject.name == "ForestRoot")
+                {
+                    root = t.gameObject;
+                }
+            }
+            if (root == null)
+            {
+                throw new System.Exception("Forest node cannot contain manually created children.");
+            }
         }
         
 

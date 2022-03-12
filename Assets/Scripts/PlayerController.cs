@@ -101,7 +101,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    protected Vector3 ForwardForce(float forceMultiplier)
+    protected virtual Vector3 ForwardForce(float forceMultiplier)
     {
         var forward = transform.forward;
         var force = new Vector3(forward.x * rb.mass * forceMultiplier, forward.y, forward.z * rb.mass * forceMultiplier);

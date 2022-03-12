@@ -45,13 +45,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 8491405830525673152}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 359ef3c485fe5644cb4fdce1f05c9bf2, type: 3}
+  m_Script: {fileID: 11500000, guid: 74424319c2f07b64688e21105398ff4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resolution: 200
-  maxTerrainHeight: 10
-  perlinScale: 2
-  perlinOffset: {x: 4, y: 1}
+  resolution: 10
+  maxTerrainHeight: 20
+  perlinScale: 4
+  perlinOffset: {x: 0, y: 0}
   normal: {x: 0, y: 1, z: 0}
   waterPlane: {fileID: 3276701706792251216}
 --- !u!33 &8491405830525673154

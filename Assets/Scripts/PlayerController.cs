@@ -5,19 +5,23 @@ using static UnityEngine.InputSystem.InputAction;
 [RequireComponent(typeof(GroundCheck))]
 public class PlayerController : MonoBehaviour
 {
-    public float jumpForceMultiplier = 3;
+    public float jumpForwardForceMultiplier = 3;
+    public float jumpUpwardForceMultiplier = 10;
     public Camera mainCamera;
 
-    private Animator anim;
-    private Rigidbody rb;
-    private GroundCheck check;
+    protected Animator anim;
 
-    private bool jumpStarted = false;
-    private bool accelerating = false;
-    private Vector3 vel = Vector3.zero;
+    protected Rigidbody rb;
 
-    private int attackIdx = 0;
-    private int skillQIdx = 0;
+    protected GroundCheck check;
+
+    protected bool jumpStarted = false;
+
+    protected bool accelerating = false;
+
+    protected Vector3 vel = Vector3.zero;
+
+    protected int attackIdx = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -37,7 +41,7 @@ public class PlayerController : MonoBehaviour
         transform.rotation = Quaternion.Euler(0, r.y , r.z);
     }
 
-    private void OnAnimatorMove()
+    public void OnAnimatorMove()
     {
         var stateInfo = anim.GetCurrentAnimatorStateInfo(0);
         if (!stateInfo.IsTag("No Root Motion"))
@@ -62,17 +66,18 @@ public class PlayerController : MonoBehaviour
         anim.SetBool("Run", accelerating);
     }
 
-    public void OnJump(CallbackContext ctx)
+    public virtual void OnJump(CallbackContext ctx)
     {
         if (jumpStarted) return;
         jumpStarted = true;
-        var force = ForwardForce(jumpForceMultiplier);
+        var force = ForwardForce(jumpForwardForceMultiplier);
         if (accelerating)
         {
             force.Scale(new Vector3(2f, 0, 2f));
         }
-        force.y += 10 * rb.mass;
+        force.y += jumpUpwardForceMultiplier * rb.mass;
         rb.AddForce(force, ForceMode.Impulse);
+        anim.SetBool("Land Animation", true);
         anim.SetTrigger("Jump");
     }
 
@@ -96,7 +101,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private Vector3 ForwardForce(float forceMultiplier)
+    protected Vector3 ForwardForce(float forceMultiplier)
     {
         var forward = transform.forward;
         var force = new Vector3(forward.x * rb.mass * forceMultiplier, forward.y, forward.z * rb.mass * forceMultiplier);
@@ -105,7 +110,7 @@ public class PlayerController : MonoBehaviour
         return force;
     }
 
-    private bool CanPerformAction()
+    public bool CanPerformAction()
     {
         var stateInfo = anim.GetCurrentAnimatorStateInfo(0);
         return stateInfo.IsTag("Idle") && !anim.IsInTransition(0);

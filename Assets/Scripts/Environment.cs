@@ -5,6 +5,8 @@ using UnityEngine;
 public class Environment : MonoBehaviour
 {
     public Lighting lighting = Lighting.Day;
+    public GameObject lightsRoot;
+    public GameObject player;
 
     [SerializeField]
     public EnvConfig[] envConfigs;
@@ -20,6 +22,12 @@ public class Environment : MonoBehaviour
     void Start()
     {
         UpdateEnvironment();
+    }
+
+    public void LateUpdate()
+    {
+        lightsRoot.transform.position = player.transform.position + player.transform.up * 60;
+        lightsRoot.transform.rotation = Quaternion.LookRotation(lightsRoot.transform.forward, player.transform.up);
     }
 
     private void ApplyLighting()

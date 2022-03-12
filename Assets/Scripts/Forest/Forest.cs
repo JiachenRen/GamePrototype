@@ -33,11 +33,16 @@ public abstract class Forest : MonoBehaviour
         {
             if (Application.isPlaying && t.gameObject.name == "ForestRoot")
             {
-                Destroy(t.gameObject);
+                foreach (Transform tr in t)
+                {
+                    Destroy(tr.gameObject);
+                }
+
+                root = t.gameObject;
             }
         }
 
-        if (transform.childCount == 0 || Application.isPlaying)
+        if (root == null)
         {
             root = new GameObject("ForestRoot");
             root.transform.parent = transform;

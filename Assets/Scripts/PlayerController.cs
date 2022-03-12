@@ -9,6 +9,8 @@ public class PlayerController : MonoBehaviour
     public float jumpUpwardForceMultiplier = 10;
     public Camera mainCamera;
 
+    protected bool stasis = true;
+
     protected Animator anim;
 
     protected Rigidbody rb;
@@ -29,6 +31,9 @@ public class PlayerController : MonoBehaviour
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
         check = GetComponent<GroundCheck>();
+
+        // Enter stasis until ground contact.
+        anim.speed = 0f;
     }
 
     // Update is called once per frame
@@ -138,9 +143,19 @@ public class PlayerController : MonoBehaviour
     
     public void OnCollisionEnter(Collision collision)
     {
+        // Contact with ground, start spawn animation.
+        if (!check.Airborne && stasis)
+        {
+            if (stasis)
+            {
+                stasis = false;
+                anim.speed = 1;
+            }
+        }
 
         if (jumpStarted && !check.Airborne) 
         { 
+
             jumpStarted = false;
             anim.SetTrigger("Land");
         }

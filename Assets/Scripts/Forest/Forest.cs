@@ -16,43 +16,37 @@ public abstract class Forest : MonoBehaviour
 
     public void Start()
     {
-        PrepareRoot();
+        GenerateForest();
     }
 
     public void OnValidate()
     {
         if (GetComponent<RenderInEditor>().renderingEnabled)
         {
-            PrepareRoot();
+            GenerateForest();
         }
     }
 
-    private void PrepareRoot()
+    public void GenerateForest()
     {
-        if (transform.childCount == 0)
+        foreach (Transform t in transform)
+        {
+            if (Application.isPlaying && t.gameObject.name == "ForestRoot")
+            {
+                Destroy(t.gameObject);
+            }
+        }
+
+        if (transform.childCount == 0 || Application.isPlaying)
         {
             root = new GameObject("ForestRoot");
             root.transform.parent = transform;
-        } else
-        {
-            foreach (Transform t in transform)
-            {
-                if (t.gameObject.name == "ForestRoot")
-                {
-                    root = t.gameObject;
-                }
-            }
-            if (root == null)
-            {
-                throw new System.Exception("Forest node cannot contain manually created children.");
-            }
         }
-        
 
         SpawnTrees();
     }
 
-    public void CreateTree(Vector3 position, Quaternion rotation)
+    protected void CreateTree(Vector3 position, Quaternion rotation)
     {
         if (flora == null) return;
         var tree = flora.Sample();
@@ -64,5 +58,5 @@ public abstract class Forest : MonoBehaviour
         material.shader = useWind ? wind.shader : Shader.Find("Standard");
     }
 
-    public abstract void SpawnTrees();
+    protected abstract void SpawnTrees();
 }

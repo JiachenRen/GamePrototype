@@ -49,6 +49,8 @@ public class Planet : MonoBehaviour
                     UpdateSurface(waterSurface, radius + waterLevelOffset, new NoiseLayer[] { });
                 }
 
+                GetComponent<PlanetaryForest>().GenerateForest();
+
                 return;
             } else
             {
@@ -92,6 +94,8 @@ public class Planet : MonoBehaviour
 
             i++;
         }
+
+        GetComponent<PlanetaryForest>().GenerateForest();
     }
 
     private void UpdateSurface(PlanetSurface surface, float newRadius, NoiseLayer[] noiseLayers)

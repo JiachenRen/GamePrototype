@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class PlanetaryForest : Forest
 {
-    public Planet planet;
-
-    public override void SpawnTrees()
+    protected override void SpawnTrees()
     {
+        var planet = GetComponent<Planet>();
+
         for (int i = 0; i < treesToSpawn; i++)
         {
             var norm = Random.insideUnitSphere;

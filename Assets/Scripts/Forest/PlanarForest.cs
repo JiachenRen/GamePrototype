@@ -6,7 +6,7 @@ public class PlanarForest : Forest
 {
     public Ground ground;
 
-    public override void SpawnTrees()
+    protected override void SpawnTrees()
     {
         var bounds = ground.GetComponent<Renderer>().bounds;
         var width = bounds.size.x;

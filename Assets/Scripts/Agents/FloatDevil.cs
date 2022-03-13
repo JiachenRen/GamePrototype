@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.SceneManagement;
 
 public class FloatDevil : ComputerAgent {
 
@@ -39,6 +40,9 @@ public class FloatDevil : ComputerAgent {
         if (hp <= 0)
         {
             Die();
+            Cursor.visible = true;
+            Screen.lockCursor = false;
+            UnityEngine.SceneManagement.SceneManager.LoadScene("GameOver");
         }
     }
 

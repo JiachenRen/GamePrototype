@@ -87,7 +87,7 @@ public class Planet : MonoBehaviour
                 obj.SetActive(false);
             } else
             {
-                Destroy(obj);
+                //Destroy(obj);
             }
         }
     }

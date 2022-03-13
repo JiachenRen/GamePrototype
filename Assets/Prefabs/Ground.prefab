@@ -10,10 +10,10 @@ GameObject:
   m_Component:
   - component: {fileID: 8491405830525673164}
   - component: {fileID: 8491405830525673165}
-  - component: {fileID: 8491405830525673154}
   - component: {fileID: 8491405830525673155}
   - component: {fileID: 8491405830525673167}
   - component: {fileID: 8491405830525673166}
+  - component: {fileID: 4454185673839099650}
   m_Layer: 0
   m_Name: Ground
   m_TagString: Ground
@@ -48,20 +48,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74424319c2f07b64688e21105398ff4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resolution: 10
-  maxTerrainHeight: 20
-  perlinScale: 4
-  perlinOffset: {x: 0, y: 0}
-  normal: {x: 0, y: 1, z: 0}
+  resolution: 256
+  heightVariance: 15
+  perlinScale: 1
+  perlinOffset: {x: 71, y: 357}
   waterPlane: {fileID: 3276701706792251216}
---- !u!33 &8491405830525673154
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8491405830525673152}
-  m_Mesh: {fileID: 0}
 --- !u!23 &8491405830525673155
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -133,6 +124,14 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!33 &4454185673839099650
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8491405830525673152}
+  m_Mesh: {fileID: 0}
 --- !u!1001 &3276701706792378692
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -140,6 +139,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 8491405830525673164}
     m_Modifications:
+    - target: {fileID: 134676, guid: 6488b6e6bbe8a9c4585b531a71d8211c, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 440718, guid: 6488b6e6bbe8a9c4585b531a71d8211c, type: 3}
       propertyPath: m_RootOrder
       value: 0

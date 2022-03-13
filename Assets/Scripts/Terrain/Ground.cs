@@ -28,6 +28,7 @@ public class Ground: MonoBehaviour
     private void CreateSurface()
     {
         var surface = new UnevenCubeSurface(resolution, perlinScale, heightVariance, perlinOffset);
+        surface.GenerateMesh();
         GetComponent<MeshFilter>().sharedMesh = surface.mesh;
         GetComponent<MeshCollider>().sharedMesh = surface.mesh;
     }

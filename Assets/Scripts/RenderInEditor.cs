@@ -8,8 +8,13 @@ public class RenderInEditor : MonoBehaviour
 {
     public bool renderingEnabled = true;
     
-    [Header("Names of children that are generated and should be removed at each editor update.")]
+    [Tooltip("Names of children that are generated and should be removed at each editor update.")]
     public String[] generatedChildren;
+
+    private void Awake()
+    {
+        DestroyGeneratedObjects();
+    }
 
     private void OnValidate()
     {
@@ -17,8 +22,12 @@ public class RenderInEditor : MonoBehaviour
         
         EditorApplication.delayCall += () =>
         {
-            DestroyGeneratedObjects();
-            OnEditorRender();
+            if (Application.isPlaying) return;
+            if (gameObject != null && gameObject.activeInHierarchy)
+            {
+                DestroyGeneratedObjects();
+                OnEditorRender();
+            }
         };
     }
 
@@ -26,7 +35,7 @@ public class RenderInEditor : MonoBehaviour
     {
         foreach (var obj in FindObjectsToDestroy())
         {
-            Destroy(obj);
+            DestroyImmediate(obj);
         }
     }
 

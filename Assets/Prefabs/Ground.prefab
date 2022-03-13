@@ -48,6 +48,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74424319c2f07b64688e21105398ff4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  renderingEnabled: 1
+  generatedChildren: []
   resolution: 256
   heightVariance: 15
   perlinScale: 1

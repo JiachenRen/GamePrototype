@@ -21,8 +21,10 @@ public class Environment : RenderInEditor
     public void LateUpdate()
     {
         // For now, we just place the light directly above the player's head.
-        lightsRoot.transform.position = player.transform.position + player.transform.up * 60;
-        lightsRoot.transform.rotation = Quaternion.LookRotation(lightsRoot.transform.forward, player.transform.up);
+        if (player == null) return;
+        var up = player.transform.up;
+        lightsRoot.transform.position = player.transform.position + up * 60;
+        lightsRoot.transform.rotation = Quaternion.LookRotation(lightsRoot.transform.forward, up);
     }
 
     protected override void OnEditorRender()

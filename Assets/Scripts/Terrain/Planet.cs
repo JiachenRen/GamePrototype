@@ -23,7 +23,9 @@ public class Planet : RenderInEditor
     public GameObject[] agentPrototypes;
     private List<GameObject> intermediates;
 
-    private GameObject root;
+    private GameObject surfacesRoot;
+    private GameObject agentsRoot;
+    
     private List<GameObject> surfaceGameObjects;
 
     private PlanetSurface[] surfaces;
@@ -47,8 +49,8 @@ public class Planet : RenderInEditor
 
     private void Initialize()
     {
-        root = new GameObject("SurfacesRoot");
-        root.transform.parent = transform;
+        surfacesRoot = new GameObject("SurfacesRoot");
+        surfacesRoot.transform.parent = transform;
         
         surfaces = new PlanetSurface[6];
         waterSurfaces = new WaterSurface[6];
@@ -86,12 +88,15 @@ public class Planet : RenderInEditor
 
     private void SpawnAgents()
     {
+        agentsRoot = new GameObject("Agents");
+        agentsRoot.transform.parent = transform;
+
         foreach (var agent in agentPrototypes)
         {
             var computerAgent = agent.GetComponent<ComputerAgent>();
             for (var i = 0; i < computerAgent.quantity; i++)
             {
-                var obj = computerAgent.Spawn(RandomPositionOnNavMesh(0.3f), transform);
+                var obj = computerAgent.Spawn(RandomPositionOnNavMesh(0.3f), agentsRoot.transform);
 
                 // Make agent subject to planet's gravitational pull.
                 GetComponent<GravityField>().subjects.Add(obj);
@@ -137,7 +142,7 @@ public class Planet : RenderInEditor
         var gameObj = new GameObject(objName);
         gameObj.AddComponent<MeshFilter>();
         gameObj.transform.up = up;
-        gameObj.transform.parent = root.transform;
+        gameObj.transform.parent = surfacesRoot.transform;
         return gameObj;
     }
 

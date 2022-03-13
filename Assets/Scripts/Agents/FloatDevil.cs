@@ -1,9 +1,9 @@
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.SceneManagement;
 
 public class FloatDevil : ComputerAgent
 {
-    // changes these in unity inspector
     public float lookRadius = 10f;
     public float attackRadius = 2f;
 
@@ -35,8 +35,14 @@ public class FloatDevil : ComputerAgent
         {
             navMeshAgent.SetDestination(player.transform.position);
         }
-
-        if (hp <= 0) Die();
+        
+        if (hp <= 0)
+        {
+            Die();
+            Cursor.visible = true;
+            Screen.lockCursor = false;
+            UnityEngine.SceneManagement.SceneManager.LoadScene("GameOver");
+        }
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -48,9 +54,10 @@ public class FloatDevil : ComputerAgent
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.cyan;
-        Gizmos.DrawWireSphere(transform.position, lookRadius);
+        var position = transform.position;
+        Gizmos.DrawWireSphere(position, lookRadius);
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackRadius);
+        Gizmos.DrawWireSphere(position, attackRadius);
     }
 
     // facing player with smooth rotation

@@ -51,16 +51,17 @@ public abstract class Forest : MonoBehaviour
         SpawnTrees();
     }
 
-    protected void CreateTree(Vector3 position, Quaternion rotation)
+    protected GameObject CreateTree(Vector3 position, Quaternion rotation)
     {
-        if (flora == null) return;
+        if (flora == null) return null;
         var tree = flora.Sample();
-        if (tree == null) return;
+        if (tree == null) return null;
         var newTree = Instantiate(tree, position, rotation);
         newTree.AddComponent<MeshCollider>();
         newTree.transform.parent = root.transform;
         Material material = newTree.GetComponent<MeshRenderer>().sharedMaterial;
         material.shader = useWind ? wind.shader : Shader.Find("Standard");
+        return newTree;
     }
 
     protected abstract void SpawnTrees();

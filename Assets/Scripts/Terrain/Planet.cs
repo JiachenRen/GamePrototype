@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class Planet : MonoBehaviour
 {
@@ -14,9 +15,12 @@ public class Planet : MonoBehaviour
     public NoiseLayer[] noiseLayers;
 
     PlanetSurface[] surfaces;
-    PlanetSurface[] waterSurfaces;
+    CurvedSurface[] waterSurfaces;
+    UnwalkableSurface[] unwalkableMasks;
 
     private GameObject root;
+    private List<GameObject> surfaceGameObjects;
+    private List<GameObject> intermediates;
 
     private static Vector3[] directions = { Vector3.down, Vector3.up, Vector3.forward, Vector3.back, Vector3.left, Vector3.right };
     // Start is called before the first frame update
@@ -35,29 +39,6 @@ public class Planet : MonoBehaviour
 
     private void Initialize()
     {
-        if (root != null)
-        {
-            if (Application.isEditor)
-            {
-                // Optimize Performance if in editor mode.
-                foreach (var surface in surfaces)
-                {
-                    UpdateSurface(surface, radius, noiseLayers);
-                }
-                foreach (var waterSurface in waterSurfaces)
-                {
-                    UpdateSurface(waterSurface, radius + waterLevelOffset, new NoiseLayer[] { });
-                }
-
-                GetComponent<PlanetaryForest>().GenerateForest();
-
-                return;
-            } else
-            {
-                Destroy(root);
-            }
-        }
-
         // Delete terrains generated during editing.
         if (Application.isPlaying)
         {
@@ -73,56 +54,93 @@ public class Planet : MonoBehaviour
         root = new GameObject("SurfacesRoot");
         root.transform.parent = transform;
         surfaces = new PlanetSurface[6];
-        waterSurfaces = new PlanetSurface[6];
+        waterSurfaces = new CurvedSurface[6];
+        unwalkableMasks = new UnwalkableSurface[6];
+        surfaceGameObjects = new List<GameObject> {};
+        intermediates = new List<GameObject>();
         
         var i = 0;
         foreach (var dir in directions)
         {
-            var surface = GenerateSurface(dir, radius, false);
-            surface.transform.parent = root.transform;
-            surfaces[i] = surface;
-
-            var waterSurface = GenerateSurface(dir, radius + waterLevelOffset, true);
-            waterSurface.transform.parent = root.transform;
-            waterSurfaces[i] = waterSurface;
-            GameObject obj = waterSurface.gameObject;
-
-            obj.GetComponent<MeshRenderer>().sharedMaterials = waterMaterials;
-            obj.AddComponent<AQUAS_Lite.AQUAS_Lite_Reflection>().ignoreOcclusionCulling = true;
-            var probe = obj.AddComponent<ReflectionProbe>();
-            probe.transform.parent = obj.transform;
-
+            surfaces[i] = MakePlanetSurface(dir);
+            waterSurfaces[i] = MakeWaterSurface(dir, surfaceGameObjects[i].transform);
+            unwalkableMasks[i] = MakeUnwalkableSurface(dir, surfaceGameObjects[i].transform);
             i++;
         }
 
         GetComponent<PlanetaryForest>().GenerateForest();
-    }
 
-    private void UpdateSurface(PlanetSurface surface, float newRadius, NoiseLayer[] noiseLayers)
-    {
-        surface.resolution = resolution;
-        surface.noiseLayers = noiseLayers;
-        surface.radius = newRadius;
-        surface.GenerateMesh();
-    }
-
-    private PlanetSurface GenerateSurface(Vector3 normal, float radius, bool isWaterSurface)
-    {
-        var gameObj = new GameObject(isWaterSurface ? "WaterSurface" : "Surface");
-        gameObj.tag = Constants.Tags.Ground;
-        gameObj.AddComponent<MeshFilter>();
-        if (!isWaterSurface)
+        // Everything in place. Now bake Nav Mesh.
+        foreach (var obj in surfaceGameObjects)
         {
-            gameObj.AddComponent<MeshCollider>();
+            var navMeshSurface = obj.AddComponent<NavMeshSurface>();
+            navMeshSurface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
+            navMeshSurface.collectObjects = CollectObjects.Children;
+            navMeshSurface.BuildNavMesh();
         }
+
+        // Destroy all intermediates
+        foreach (var obj in intermediates)
+        {
+            if (!Application.isPlaying)
+            {
+                obj.SetActive(false);
+            } else
+            {
+                Destroy(obj);
+            }
+        }
+    }
+
+    private GameObject GenerateSurfaceGameObject(string name, Vector3 up)
+    {
+        var gameObj = new GameObject(name);
+        gameObj.AddComponent<MeshFilter>();
+        gameObj.transform.up = up;
+        gameObj.transform.parent = root.transform;
+        return gameObj;
+    }
+
+    private PlanetSurface MakePlanetSurface(Vector3 up)
+    {
+        var gameObj = GenerateSurfaceGameObject("Surface", up);
+        gameObj.tag = Constants.Tags.Ground;
         gameObj.AddComponent<MeshRenderer>().sharedMaterial = surfaceMaterial;
-        var surface = gameObj.AddComponent<PlanetSurface>();
-        surface.radius = radius;
-        surface.resolution = resolution;
-        surface.normal = normal;
-        surface.noiseLayers = isWaterSurface ? new NoiseLayer[] { } : noiseLayers;
+        var surface = new PlanetSurface(resolution, radius, gameObj.transform, noiseLayers);
         surface.GenerateMesh();
+        gameObj.AddComponent<MeshCollider>().sharedMesh = surface.mesh;
+        gameObj.GetComponent<MeshFilter>().sharedMesh = surface.mesh;
+        surfaceGameObjects.Add(gameObj);
         return surface;
     }
 
+    private UnwalkableSurface MakeUnwalkableSurface(Vector3 up, Transform parent)
+    {
+        var gameObj = GenerateSurfaceGameObject("Unwalkable Surface", up);
+        intermediates.Add(gameObj);
+        gameObj.transform.parent = parent;
+        gameObj.layer = Constants.Layers.TerrainMask;
+        var surface = new UnwalkableSurface(resolution, radius, radius + waterLevelOffset, gameObj.transform, noiseLayers);
+        surface.GenerateMesh();
+        gameObj.AddComponent<MeshCollider>().sharedMesh = surface.mesh;
+        gameObj.GetComponent<MeshFilter>().sharedMesh = surface.mesh;
+        var mod = gameObj.AddComponent<NavMeshModifier>();
+        mod.overrideArea = true;
+        mod.area = Constants.AreaType.NotWalkable;
+        return surface;
+    }
+
+    private CurvedSurface MakeWaterSurface(Vector3 up, Transform parent)
+    {
+        var gameObj = GenerateSurfaceGameObject("Water Surface", up);
+        gameObj.transform.parent = parent;
+        gameObj.AddComponent<MeshRenderer>().sharedMaterials = waterMaterials;
+        var surface = new CurvedSurface(resolution, radius + waterLevelOffset);
+        surface.GenerateMesh();
+        gameObj.GetComponent<MeshFilter>().sharedMesh = surface.mesh;
+        gameObj.AddComponent<AQUAS_Lite.AQUAS_Lite_Reflection>().ignoreOcclusionCulling = true;
+        var probe = gameObj.AddComponent<ReflectionProbe>();
+        probe.transform.parent = gameObj.transform;
+        return surface;
+    }
 }

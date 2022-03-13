@@ -21,9 +21,9 @@ public class PlanarForest : Forest
             var z = Random.Range(-height / 2, height / 2);
 
             RaycastHit hit;
-            Ray ray = new Ray(new Vector3(x, ground.maxTerrainHeight, z), Vector3.down);
+            Ray ray = new Ray(new Vector3(x, ground.heightVariance, z), Vector3.down);
 
-            if (ground.GetComponent<MeshCollider>().Raycast(ray, out hit, ground.maxTerrainHeight * 2))
+            if (ground.GetComponent<MeshCollider>().Raycast(ray, out hit, ground.heightVariance * 2))
             {
                 var y = hit.point.y;
                 if (y > ground.waterPlane.transform.position.y)

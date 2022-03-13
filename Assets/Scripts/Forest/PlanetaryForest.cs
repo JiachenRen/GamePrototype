@@ -20,7 +20,7 @@ public class PlanetaryForest : Forest
                 var dist = (hit.point - planet.transform.position).magnitude;
                 if (dist > planet.waterLevelOffset + planet.radius && hit.transform.tag == Constants.Tags.Ground)
                 {
-                    CreateTree(hit.point, Quaternion.FromToRotation(Vector3.up, norm));
+                    CreateTree(hit.point, Quaternion.FromToRotation(Vector3.up, norm)).transform.parent = hit.transform;
                 }
             }
         }

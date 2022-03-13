@@ -2,21 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlanetSurface : Ground
+public class PlanetSurface : CurvedSurface
 {
-    public float radius = 50;
     public NoiseLayer[] noiseLayers = { };
 
-    public override Vector3 GetVertex(float xRatio, float zRatio, Vector3 xAxis, Vector3 zAxis)
+    // Transform is only used to calculate seamless simplex noise.
+    public Transform transform;
+
+    public PlanetSurface(int resolution, float radius, Transform transform, NoiseLayer[] noiseLayers) : base(resolution, radius)
     {
-        var xCoord = xRatio * 2f;
-        var zCoord = zRatio * 2f;
-        var vertex = normal + xCoord * xAxis + zCoord * zAxis;
-        var n = vertex.normalized;
-        return n * (radius + GetElevation(n));
+        this.noiseLayers = noiseLayers;
+        this.transform = transform;
     }
 
-    public virtual float GetElevation(Vector3 normal)
+    public override float GetElevation(Vector3 normal)
     {
         var elevation = 0f;
         var layerOutputs = new float[noiseLayers.Length];
@@ -28,7 +27,7 @@ public class PlanetSurface : Ground
                 continue;
             }
 
-            var h = noiseLayer.Eval(normal);
+            var h = noiseLayer.Eval(transform.rotation * normal);
             layerOutputs[i] = h;
             foreach (var maskIdx in noiseLayer.maskIndices)
             {

@@ -1,8 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
-[System.Serializable]
+[Serializable]
 public class PrefabGroup
 {
     public GameObject[] prefabs;
@@ -11,10 +11,7 @@ public class PrefabGroup
 
     public GameObject Sample()
     {
-        if (prefabs.Length == 0)
-        {
-            return null;
-        }
+        if (prefabs.Length == 0) return null;
 
         return prefabs[WeightedSample(weights)];
     }
@@ -22,10 +19,7 @@ public class PrefabGroup
     public static int WeightedSample(float[] weights)
     {
         var sum = 0f;
-        foreach (var weight in weights)
-        {
-            sum += weight;
-        }
+        foreach (var weight in weights) sum += weight;
 
         var r = Random.value;
         var s = 0f;
@@ -34,7 +28,7 @@ public class PrefabGroup
         {
             if (weights[i] <= 0f) continue;
 
-            s +=  weights[i] / sum;
+            s += weights[i] / sum;
             if (s >= r) return i;
         }
 

@@ -1,10 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.InputSystem.InputAction;
+
 public class CameraController : MonoBehaviour
 {
-
     public GameObject player;
 
     public float pitchFreedom = 8;
@@ -17,21 +15,21 @@ public class CameraController : MonoBehaviour
     [Tooltip("How far away from the player to place the camera.")]
     public float distance = 10;
 
+    // Vertial rotation offset
+    protected float pitchOffset;
+
     private bool playMode = true;
 
     // Horizontal rotation offset
-    protected float yawOffset = 0;
-
-    // Vertial rotation offset
-    protected float pitchOffset = 0;
+    protected float yawOffset;
 
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
     }
 
-    void LateUpdate()
+    private void LateUpdate()
     {
         var rotation = Quaternion.Euler(0, yawOffset * yawSpeed, 0);
         var positionOffset = new Vector3(-rotation.y * distance, elevation, -rotation.w * distance);
@@ -54,5 +52,5 @@ public class CameraController : MonoBehaviour
     {
         playMode = !playMode;
         Cursor.lockState = playMode ? CursorLockMode.Locked : CursorLockMode.None;
-    }  
+    }
 }

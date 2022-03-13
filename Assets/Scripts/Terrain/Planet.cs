@@ -1,13 +1,19 @@
-using System.Collections;
 using System.Collections.Generic;
+using AQUAS_Lite;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class Planet : MonoBehaviour
+public class Planet : RenderInEditor
 {
+    public delegate void OnRaycastHit(RaycastHit hit);
+
+    private static readonly Vector3[] Directions =
+        {Vector3.down, Vector3.up, Vector3.forward, Vector3.back, Vector3.left, Vector3.right};
+
     public float radius = 100;
     public int resolution = 100;
-    public float waterLevelOffset = 0;
+    public float waterLevelOffset;
 
     public Material surfaceMaterial;
     public Material[] waterMaterials;
@@ -15,54 +21,43 @@ public class Planet : MonoBehaviour
     public NoiseLayer[] noiseLayers;
 
     public GameObject[] agentPrototypes;
-
-    PlanetSurface[] surfaces;
-    WaterSurface[] waterSurfaces;
-    UnwalkableSurface[] unwalkableMasks;
+    private List<GameObject> intermediates;
 
     private GameObject root;
     private List<GameObject> surfaceGameObjects;
-    private List<GameObject> intermediates;
 
-    private static Vector3[] directions = { Vector3.down, Vector3.up, Vector3.forward, Vector3.back, Vector3.left, Vector3.right };
+    private PlanetSurface[] surfaces;
+    private UnwalkableSurface[] unwalkableMasks;
+    private WaterSurface[] waterSurfaces;
+
     // Start is called before the first frame update
-   public void Start()
+    public void Start()
+    {
+        if (Application.isPlaying)
+        {
+            DestroyGeneratedObjects();
+        }
+        Initialize();
+    }
+
+    protected override void OnEditorRender()
     {
         Initialize();
     }
 
-    public void OnValidate()
-    {
-        if (GetComponent<RenderInEditor>().renderingEnabled)
-        {
-            Initialize();
-        }
-    }
-
     private void Initialize()
     {
-        // Delete terrains generated during editing.
-        if (Application.isPlaying)
-        {
-            foreach (Transform t in transform)
-            {
-                if (t.gameObject.name == "SurfacesRoot")
-                {
-                    Destroy(t.gameObject);
-                }
-            }
-        }
-
         root = new GameObject("SurfacesRoot");
         root.transform.parent = transform;
+        
         surfaces = new PlanetSurface[6];
         waterSurfaces = new WaterSurface[6];
         unwalkableMasks = new UnwalkableSurface[6];
-        surfaceGameObjects = new List<GameObject> {};
+        surfaceGameObjects = new List<GameObject>();
         intermediates = new List<GameObject>();
-        
+
         var i = 0;
-        foreach (var dir in directions)
+        foreach (var dir in Directions)
         {
             surfaces[i] = MakePlanetSurface(dir);
             waterSurfaces[i] = MakeWaterSurface(dir, surfaceGameObjects[i].transform);
@@ -85,15 +80,8 @@ public class Planet : MonoBehaviour
 
         // Destroy all intermediates
         foreach (var obj in intermediates)
-        {
             if (!Application.isPlaying)
-            {
                 obj.SetActive(false);
-            } else
-            {
-                //Destroy(obj);
-            }
-        }
     }
 
     private void SpawnAgents()
@@ -111,30 +99,21 @@ public class Planet : MonoBehaviour
         }
     }
 
-    public delegate void OnRaycastHit(RaycastHit hit);
-
     // Get a random position on the planet where land objects can spawn.
     public Vector3 RandomPositionOnNavMesh(float elevation = 1f)
     {
         Vector3? vec = null;
-        RaycastToSurface(Random.insideUnitSphere, (hit) => {
-            if (hit.collider.tag == Constants.Tags.Ground && IsPointOnNavMesh(hit.point))
-            {
-
+        RaycastToSurface(Random.insideUnitSphere, hit =>
+        {
+            if (hit.collider.CompareTag(Constants.Tags.Ground) && IsPointOnNavMesh(hit.point))
                 vec = hit.point + (hit.point - transform.position).normalized * elevation;
-            }
         });
         return vec == null ? RandomPositionOnNavMesh() : vec.Value;
     }
 
     public bool IsPointOnNavMesh(Vector3 pos)
     {
-        NavMeshHit hit;
-
-        if (NavMesh.SamplePosition(pos, out hit, 1, NavMesh.AllAreas))
-        {
-            return true;
-        }
+        if (NavMesh.SamplePosition(pos, out _, 1, NavMesh.AllAreas)) return true;
 
         return false;
     }
@@ -148,18 +127,14 @@ public class Planet : MonoBehaviour
     public void RaycastToSurface(Vector3 norm, OnRaycastHit onHit)
     {
         var pointAbovePlanet = transform.position + norm * radius * 1.5f;
-        RaycastHit hit;
-        Ray ray = new Ray(pointAbovePlanet, -norm);
+        var ray = new Ray(pointAbovePlanet, -norm);
 
-        if (Physics.Raycast(ray, out hit))
-        {
-            onHit(hit);
-        }
+        if (Physics.Raycast(ray, out var hit)) onHit(hit);
     }
 
-    private GameObject GenerateSurfaceGameObject(string name, Vector3 up)
+    private GameObject GenerateSurfaceGameObject(string objName, Vector3 up)
     {
-        var gameObj = new GameObject(name);
+        var gameObj = new GameObject(objName);
         gameObj.AddComponent<MeshFilter>();
         gameObj.transform.up = up;
         gameObj.transform.parent = root.transform;
@@ -185,7 +160,8 @@ public class Planet : MonoBehaviour
         intermediates.Add(gameObj);
         gameObj.transform.parent = parent;
         gameObj.layer = Constants.Layers.TerrainMask;
-        var surface = new UnwalkableSurface(resolution, radius, radius + waterLevelOffset, gameObj.transform, noiseLayers);
+        var surface =
+            new UnwalkableSurface(resolution, radius, radius + waterLevelOffset, gameObj.transform, noiseLayers);
         surface.GenerateMesh();
         gameObj.AddComponent<MeshCollider>().sharedMesh = surface.mesh;
         gameObj.GetComponent<MeshFilter>().sharedMesh = surface.mesh;
@@ -203,7 +179,7 @@ public class Planet : MonoBehaviour
         var surface = new WaterSurface(resolution, radius + waterLevelOffset, up);
         surface.GenerateMesh();
         gameObj.GetComponent<MeshFilter>().sharedMesh = surface.mesh;
-        gameObj.AddComponent<AQUAS_Lite.AQUAS_Lite_Reflection>().ignoreOcclusionCulling = true;
+        gameObj.AddComponent<AQUAS_Lite_Reflection>().ignoreOcclusionCulling = true;
         var probe = gameObj.AddComponent<ReflectionProbe>();
         probe.transform.parent = gameObj.transform;
         return surface;

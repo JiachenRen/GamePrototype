@@ -1,21 +1,18 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 using static UnityEngine.InputSystem.InputAction;
 
 [RequireComponent(typeof(GroundCheck))]
 public class PlanetaryPlayerController : PlayerController
 {
     public Planet planet;
-    
+
+    private Vector3 up => (transform.position - planet.transform.position).normalized;
+
     public override void Start()
     {
         base.Start();
 
         planet.GetComponent<GravityField>().subjects.Add(gameObject);
-    }
-    Vector3 up
-    {
-        get { return (transform.position - planet.transform.position).normalized; }
     }
 
     // Update is called once per frame
@@ -23,7 +20,7 @@ public class PlanetaryPlayerController : PlayerController
     {
         var up = this.up;
         transform.rotation = Quaternion.FromToRotation(Vector3.up, up);
-        Ray ray = Camera.main.ScreenPointToRay(new Vector2(Screen.width / 2, Screen.height / 2));
+        var ray = Camera.main.ScreenPointToRay(new Vector2(Screen.width / 2, Screen.height / 2));
         var lookDirection = Vector3.ProjectOnPlane(ray.direction, up);
         transform.rotation = Quaternion.LookRotation(lookDirection, up);
         Debug.DrawRay(transform.position, transform.forward * 10, Color.blue);

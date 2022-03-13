@@ -1,26 +1,22 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class Ground: MonoBehaviour
+public class Ground : RenderInEditor
 {
     public int resolution = 20;
     public float heightVariance = 20;
 
-    [Tooltip("Perlin noise scale")]
-    public float perlinScale = 4;
+    [Tooltip("Perlin noise scale")] public float perlinScale = 4;
 
-    [Tooltip("Perlin noise offset")]
-    public Vector2 perlinOffset = Vector2.zero;
+    [Tooltip("Perlin noise offset")] public Vector2 perlinOffset = Vector2.zero;
 
     public GameObject waterPlane;
 
-    public void OnValidate()
+    public void Start()
     {
         CreateSurface();
     }
 
-    public void Start()
+    protected override void OnEditorRender()
     {
         CreateSurface();
     }

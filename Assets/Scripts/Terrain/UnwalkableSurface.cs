@@ -1,16 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using System;
 
 public class UnwalkableSurface : PlanetSurface
 {
-    public float waterRadius;
-
     // Maximum depth allowed under water.
     public float allowedDepthUnderWater = 1;
+    public float waterRadius;
 
-    public UnwalkableSurface(int resolution, float radius, float waterRadius, Transform transform, NoiseLayer[] noiseLayers) : base(resolution, radius, transform, noiseLayers)
+    public UnwalkableSurface(int resolution, float radius, float waterRadius, Transform transform,
+        NoiseLayer[] noiseLayers) : base(resolution, radius, transform, noiseLayers)
     {
         this.waterRadius = waterRadius;
     }
@@ -23,6 +20,6 @@ public class UnwalkableSurface : PlanetSurface
         var n = vertex.normalized;
         var height = radius + GetElevation(n);
         var threshold = waterRadius - allowedDepthUnderWater;
-        return n * (height < threshold ? height: threshold);
+        return n * (height < threshold ? height : threshold);
     }
 }

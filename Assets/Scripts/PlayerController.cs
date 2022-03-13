@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 using static UnityEngine.InputSystem.InputAction;
 
 [RequireComponent(typeof(GroundCheck))]
@@ -9,21 +8,21 @@ public class PlayerController : MonoBehaviour
     public float jumpUpwardForceMultiplier = 10;
     public Camera mainCamera;
 
-    protected bool stasis = true;
+    protected bool accelerating;
 
     protected Animator anim;
 
-    protected Rigidbody rb;
+    protected int attackIdx;
 
     protected GroundCheck check;
 
-    protected bool jumpStarted = false;
+    protected bool jumpStarted;
 
-    protected bool accelerating = false;
+    protected Rigidbody rb;
+
+    protected bool stasis = true;
 
     protected Vector3 vel = Vector3.zero;
-
-    protected int attackIdx = 0;
 
     // Start is called before the first frame update
     public virtual void Start()
@@ -37,13 +36,13 @@ public class PlayerController : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        Ray ray = Camera.main.ScreenPointToRay(new Vector2(Screen.width / 2, Screen.height / 2));
+        var ray = Camera.main.ScreenPointToRay(new Vector2(Screen.width / 2, Screen.height / 2));
         var anchor = ray.GetPoint(10);
         transform.LookAt(anchor);
         var r = transform.rotation.eulerAngles;
-        transform.rotation = Quaternion.Euler(0, r.y , r.z);
+        transform.rotation = Quaternion.Euler(0, r.y, r.z);
     }
 
     public void OnAnimatorMove()
@@ -53,6 +52,23 @@ public class PlayerController : MonoBehaviour
         {
             rb.MovePosition(anim.rootPosition);
             rb.MoveRotation(anim.rootRotation);
+        }
+    }
+
+    public void OnCollisionEnter(Collision collision)
+    {
+        // Contact with ground, start spawn animation.
+        if (!check.Airborne && stasis)
+            if (stasis)
+            {
+                stasis = false;
+                anim.speed = 1;
+            }
+
+        if (jumpStarted && !check.Airborne)
+        {
+            jumpStarted = false;
+            anim.SetTrigger("Land");
         }
     }
 
@@ -76,10 +92,7 @@ public class PlayerController : MonoBehaviour
         if (jumpStarted) return;
         jumpStarted = true;
         var force = ForwardForce(jumpForwardForceMultiplier);
-        if (accelerating)
-        {
-            force.Scale(new Vector3(2f, 0, 2f));
-        }
+        if (accelerating) force.Scale(new Vector3(2f, 0, 2f));
         force.y += jumpUpwardForceMultiplier * rb.mass;
         rb.AddForce(force, ForceMode.Impulse);
         anim.SetBool("Land Animation", true);
@@ -91,7 +104,7 @@ public class PlayerController : MonoBehaviour
         if (ctx.performed && CanPerformAction())
         {
             // Alternate between left and right punches.
-            var form = (attackIdx % 2) == 0 ? 2 : 5;
+            var form = attackIdx % 2 == 0 ? 2 : 5;
             attackIdx++;
             anim.SetFloat("Attack Form", form);
             anim.SetTrigger("Attack");
@@ -100,16 +113,14 @@ public class PlayerController : MonoBehaviour
 
     public void OnSkillQ(CallbackContext ctx)
     {
-        if (ctx.started && CanPerformAction())
-        {
-            anim.SetTrigger("Skill Q");
-        }
+        if (ctx.started && CanPerformAction()) anim.SetTrigger("Skill Q");
     }
 
     protected virtual Vector3 ForwardForce(float forceMultiplier)
     {
         var forward = transform.forward;
-        var force = new Vector3(forward.x * rb.mass * forceMultiplier, forward.y, forward.z * rb.mass * forceMultiplier);
+        var force = new Vector3(forward.x * rb.mass * forceMultiplier, forward.y,
+            forward.z * rb.mass * forceMultiplier);
         var forcePerp = new Vector3(force.z, force.y, -force.x);
         force = force * vel.y + forcePerp * vel.x;
         return force;
@@ -121,43 +132,19 @@ public class PlayerController : MonoBehaviour
         return stateInfo.IsTag("Idle") && !anim.IsInTransition(0);
     }
 
-    void FootL()
+    private void FootL()
     {
-
     }
 
-    void FootR()
+    private void FootR()
     {
-
     }
 
-    void Land()
+    private void Land()
     {
-
     }
 
-    void Hit()
+    private void Hit()
     {
-
-    }
-    
-    public void OnCollisionEnter(Collision collision)
-    {
-        // Contact with ground, start spawn animation.
-        if (!check.Airborne && stasis)
-        {
-            if (stasis)
-            {
-                stasis = false;
-                anim.speed = 1;
-            }
-        }
-
-        if (jumpStarted && !check.Airborne) 
-        { 
-
-            jumpStarted = false;
-            anim.SetTrigger("Land");
-        }
     }
 }

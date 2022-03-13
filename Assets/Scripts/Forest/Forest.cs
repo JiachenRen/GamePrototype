@@ -1,8 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
-public abstract class Forest : MonoBehaviour
+public abstract class Forest : RenderInEditor
 {
     // Start is called before the first frame update
 
@@ -11,43 +10,22 @@ public abstract class Forest : MonoBehaviour
     public bool useWind = true;
     public int treesToSpawn = 100;
 
-    [SerializeField, HideInInspector]
-    public GameObject root;
+    [SerializeField] [HideInInspector] public GameObject root;
 
     public void Start()
     {
         GenerateForest();
     }
 
-    public void OnValidate()
+    protected override void OnEditorRender()
     {
-        if (GetComponent<RenderInEditor>().renderingEnabled)
-        {
-            GenerateForest();
-        }
+        GenerateForest();
     }
 
     public void GenerateForest()
     {
-        foreach (Transform t in transform)
-        {
-            if (Application.isPlaying && t.gameObject.name == "ForestRoot")
-            {
-                foreach (Transform tr in t)
-                {
-                    Destroy(tr.gameObject);
-                }
-
-                root = t.gameObject;
-            }
-        }
-
-        if (root == null)
-        {
-            root = new GameObject("ForestRoot");
-            root.transform.parent = transform;
-        }
-
+        root = new GameObject("ForestRoot");
+        root.transform.parent = transform;
         SpawnTrees();
     }
 
@@ -59,7 +37,7 @@ public abstract class Forest : MonoBehaviour
         var newTree = Instantiate(tree, position, rotation);
         newTree.AddComponent<MeshCollider>();
         newTree.transform.parent = root.transform;
-        Material material = newTree.GetComponent<MeshRenderer>().sharedMaterial;
+        var material = newTree.GetComponent<MeshRenderer>().sharedMaterial;
         material.shader = useWind ? wind.shader : Shader.Find("Standard");
         return newTree;
     }

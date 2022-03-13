@@ -1,18 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class UnevenCubeSurface : Surface
 {
-    private float noiseMagnitude;
-    private float noiseScale;
-    private Vector2 noiseOffset;
+    private readonly float noiseMagnitude;
+    private readonly Vector2 noiseOffset;
+    private readonly float noiseScale;
 
     public UnevenCubeSurface(int resolution, float scale, float magnitude, Vector2 offset) : base(resolution)
     {
-        this.noiseScale = scale;
-        this.noiseMagnitude = magnitude;
-        this.noiseOffset = offset;
+        noiseScale = scale;
+        noiseMagnitude = magnitude;
+        noiseOffset = offset;
     }
 
     public override Vector3 GetVertex(float zRatio, float xRatio, Vector3 z, Vector3 x)
@@ -25,6 +23,7 @@ public class UnevenCubeSurface : Surface
 
     private float GetHeightAtPoint(float x, float z)
     {
-        return (Mathf.PerlinNoise((x + noiseOffset.x) * noiseScale, (z + noiseOffset.y) * noiseScale) - 0.5f) * noiseMagnitude;
+        return (Mathf.PerlinNoise((x + noiseOffset.x) * noiseScale, (z + noiseOffset.y) * noiseScale) - 0.5f) *
+               noiseMagnitude;
     }
 }

@@ -1,10 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 
-[System.Serializable]
+[Serializable]
 public class NoiseLayer
 {
+    public enum BlendMode
+    {
+        Layer,
+        Mask,
+        LayerAndMask
+    }
+
     public BlendMode blendMode = BlendMode.LayerAndMask;
     public float frequency = 1;
     public float amplitude = 1;
@@ -12,19 +18,15 @@ public class NoiseLayer
 
     [Tooltip("Layer indices must be smaller than or equal to index of this layer.")]
     public int[] maskIndices;
+
     public bool enabled = true;
     private Noise noise;
-
-
-    public enum BlendMode
-    {
-        Layer, Mask, LayerAndMask
-    }
 
     public NoiseLayer()
     {
         noise = new Noise();
     }
+
     // Evaluate Simplex noise at point.
     public float Eval(Vector3 unitVec)
     {
@@ -38,26 +40,20 @@ public class NoiseLayer
         for (var i = 0; i < layers.Length; i++)
         {
             var noiseLayer = layers[i];
-            if (!noiseLayer.enabled)
-            {
-                continue;
-            }
+            if (!noiseLayer.enabled) continue;
 
             var h = noiseLayer.Eval(norm);
             layerOutputs[i] = h;
             foreach (var maskIdx in noiseLayer.maskIndices)
             {
                 var maskLayer = layers[maskIdx];
-                if (maskLayer.enabled && maskLayer.blendMode != NoiseLayer.BlendMode.Layer)
-                {
+                if (maskLayer.enabled && maskLayer.blendMode != BlendMode.Layer)
                     layerOutputs[i] *= layerOutputs[maskIdx];
-                }
             }
-            if (noiseLayer.blendMode != NoiseLayer.BlendMode.Mask)
-            {
-                val += layerOutputs[i];
-            }
+
+            if (noiseLayer.blendMode != BlendMode.Mask) val += layerOutputs[i];
         }
+
         return val;
     }
 }

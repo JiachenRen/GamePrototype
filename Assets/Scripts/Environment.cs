@@ -1,25 +1,19 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Environment : MonoBehaviour
+public class Environment : RenderInEditor
 {
     public Lighting lighting = Lighting.Day;
     public GameObject lightsRoot;
     public GameObject player;
 
-    [SerializeField]
-    public EnvConfig[] envConfigs;
+    [SerializeField] public EnvConfig[] envConfigs;
 
     private Dictionary<Lighting, EnvConfig> configs;
 
-    private void OnValidate()
-    {
-        UpdateEnvironment();
-    }
-
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
         UpdateEnvironment();
     }
@@ -31,15 +25,17 @@ public class Environment : MonoBehaviour
         lightsRoot.transform.rotation = Quaternion.LookRotation(lightsRoot.transform.forward, player.transform.up);
     }
 
+    protected override void OnEditorRender()
+    {
+        UpdateEnvironment();
+    }
+
     private void ApplyLighting()
     {
         var config = configs[lighting];
 
         // First deactivate all lights
-        foreach (var c in configs.Values)
-        {
-            c.light.gameObject.SetActive(false);
-        }
+        foreach (var c in configs.Values) c.light.gameObject.SetActive(false);
 
         // Turn on the light corresponding to current lighting specs.
         config.light.gameObject.SetActive(true);
@@ -49,13 +45,10 @@ public class Environment : MonoBehaviour
     }
 
     // Update is called once per frame
-    void UpdateEnvironment()
+    private void UpdateEnvironment()
     {
         configs = new Dictionary<Lighting, EnvConfig>();
-        foreach (var config in envConfigs)
-        {
-            configs.Add(config.lighting, config);
-        }
+        foreach (var config in envConfigs) configs.Add(config.lighting, config);
 
         ApplyLighting();
     }
@@ -63,10 +56,12 @@ public class Environment : MonoBehaviour
 
 public enum Lighting
 {
-    Day, Night, Dusk
+    Day,
+    Night,
+    Dusk
 }
 
-[System.Serializable]
+[Serializable]
 public class EnvConfig
 {
     public Lighting lighting;

@@ -1,10 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class WaterSurface : CurvedSurface
 {
     public Vector3 normal;
+
     public WaterSurface(int resolution, float radius, Vector3 normal) : base(resolution, radius)
     {
         this.normal = normal;

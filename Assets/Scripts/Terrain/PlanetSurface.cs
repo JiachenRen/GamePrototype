@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlanetSurface : CurvedSurface
@@ -9,7 +7,8 @@ public class PlanetSurface : CurvedSurface
     // Transform is only used to calculate seamless simplex noise.
     public Transform transform;
 
-    public PlanetSurface(int resolution, float radius, Transform transform, NoiseLayer[] noiseLayers) : base(resolution, radius)
+    public PlanetSurface(int resolution, float radius, Transform transform, NoiseLayer[] noiseLayers) : base(resolution,
+        radius)
     {
         this.noiseLayers = noiseLayers;
         this.transform = transform;

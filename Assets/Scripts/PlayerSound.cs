@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerSound : MonoBehaviour
@@ -15,7 +13,7 @@ public class PlayerSound : MonoBehaviour
 
     private void PlayerStep()
     {
-        AudioClip clip = GetRandomClip();
+        var clip = GetRandomClip();
         audioSource.PlayOneShot(clip);
     }
 
@@ -26,6 +24,6 @@ public class PlayerSound : MonoBehaviour
 
     private AudioClip GetRandomClip()
     {
-        return clips[UnityEngine.Random.Range(0, clips.Length)];
+        return clips[Random.Range(0, clips.Length)];
     }
 }

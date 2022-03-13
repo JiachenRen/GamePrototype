@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class Surface
@@ -11,41 +9,36 @@ public abstract class Surface
     {
         this.resolution = resolution;
     }
- 
+
     public virtual void GenerateMesh()
     {
-        if (mesh == null)
-        {
-            mesh = new Mesh();
-        }
+        if (mesh == null) mesh = new Mesh();
 
-        Vector3[] vertices = new Vector3[resolution * resolution];
-        int[] triangles = new int[6 * (resolution - 1) * (resolution - 1)];
-        int index = 0;
-        int i = 0;
-        for (int x = 0; x < resolution; x++)
+        var vertices = new Vector3[resolution * resolution];
+        var triangles = new int[6 * (resolution - 1) * (resolution - 1)];
+        var index = 0;
+        var i = 0;
+        for (var x = 0; x < resolution; x++)
+        for (var z = 0; z < resolution; z++)
         {
-            for (int z = 0; z < resolution; z++)
+            var zRatio = z / (resolution - 1f) - 0.5f;
+            var xRatio = x / (resolution - 1f) - 0.5f;
+            vertices[i] = GetVertex(zRatio, xRatio, Vector3.forward, Vector3.right);
+
+            if (z < resolution - 1 && x < resolution - 1)
             {
-                float zRatio = z / (resolution - 1f) - 0.5f;
-                float xRatio = x / (resolution - 1f) - 0.5f;
-                vertices[i] = GetVertex(zRatio, xRatio, Vector3.forward, Vector3.right);
+                triangles[index] = i;
+                triangles[index + 1] = i + resolution + 1;
+                triangles[index + 2] = i + resolution;
 
-                if (z < resolution - 1 && x < resolution - 1)
-                {
-                    triangles[index] = i;
-                    triangles[index + 1] = i + resolution + 1;
-                    triangles[index + 2] = i + resolution;
+                triangles[index + 3] = i;
+                triangles[index + 4] = i + 1;
+                triangles[index + 5] = i + resolution + 1;
 
-                    triangles[index + 3] = i;
-                    triangles[index + 4] = i + 1;
-                    triangles[index + 5] = i + resolution + 1;
-
-                    index += 6;
-                }
-
-                i++;
+                index += 6;
             }
+
+            i++;
         }
 
         mesh.Clear();

@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlanarForest : Forest
@@ -12,7 +10,7 @@ public class PlanarForest : Forest
         var width = bounds.size.x;
         var height = bounds.size.z;
 
-        for (int i = 0; i < treesToSpawn; i++)
+        for (var i = 0; i < treesToSpawn; i++)
         {
             var tree = flora.Sample();
             var rotation = Quaternion.identity;
@@ -21,15 +19,12 @@ public class PlanarForest : Forest
             var z = Random.Range(-height / 2, height / 2);
 
             RaycastHit hit;
-            Ray ray = new Ray(new Vector3(x, ground.heightVariance, z), Vector3.down);
+            var ray = new Ray(new Vector3(x, ground.heightVariance, z), Vector3.down);
 
             if (ground.GetComponent<MeshCollider>().Raycast(ray, out hit, ground.heightVariance * 2))
             {
                 var y = hit.point.y;
-                if (y > ground.waterPlane.transform.position.y)
-                {
-                    CreateTree(new Vector3(x, y, z), rotation);
-                }
+                if (y > ground.waterPlane.transform.position.y) CreateTree(new Vector3(x, y, z), rotation);
             }
         }
     }

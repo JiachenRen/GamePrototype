@@ -30,4 +30,34 @@ public class NoiseLayer
     {
         return (noise.Evaluate(unitVec * frequency + offset) + 1) / 2 * amplitude;
     }
+
+    public static float Eval(NoiseLayer[] layers, Vector3 norm)
+    {
+        var val = 0f;
+        var layerOutputs = new float[layers.Length];
+        for (var i = 0; i < layers.Length; i++)
+        {
+            var noiseLayer = layers[i];
+            if (!noiseLayer.enabled)
+            {
+                continue;
+            }
+
+            var h = noiseLayer.Eval(norm);
+            layerOutputs[i] = h;
+            foreach (var maskIdx in noiseLayer.maskIndices)
+            {
+                var maskLayer = layers[maskIdx];
+                if (maskLayer.enabled && maskLayer.blendMode != NoiseLayer.BlendMode.Layer)
+                {
+                    layerOutputs[i] *= layerOutputs[maskIdx];
+                }
+            }
+            if (noiseLayer.blendMode != NoiseLayer.BlendMode.Mask)
+            {
+                val += layerOutputs[i];
+            }
+        }
+        return val;
+    }
 }

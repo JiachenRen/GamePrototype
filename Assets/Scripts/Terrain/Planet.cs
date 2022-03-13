@@ -14,8 +14,10 @@ public class Planet : MonoBehaviour
 
     public NoiseLayer[] noiseLayers;
 
+    public GameObject[] agentPrototypes;
+
     PlanetSurface[] surfaces;
-    CurvedSurface[] waterSurfaces;
+    WaterSurface[] waterSurfaces;
     UnwalkableSurface[] unwalkableMasks;
 
     private GameObject root;
@@ -54,7 +56,7 @@ public class Planet : MonoBehaviour
         root = new GameObject("SurfacesRoot");
         root.transform.parent = transform;
         surfaces = new PlanetSurface[6];
-        waterSurfaces = new CurvedSurface[6];
+        waterSurfaces = new WaterSurface[6];
         unwalkableMasks = new UnwalkableSurface[6];
         surfaceGameObjects = new List<GameObject> {};
         intermediates = new List<GameObject>();
@@ -79,6 +81,8 @@ public class Planet : MonoBehaviour
             navMeshSurface.BuildNavMesh();
         }
 
+        SpawnAgents();
+
         // Destroy all intermediates
         foreach (var obj in intermediates)
         {
@@ -89,6 +93,67 @@ public class Planet : MonoBehaviour
             {
                 //Destroy(obj);
             }
+        }
+    }
+
+    private void SpawnAgents()
+    {
+        foreach (var agent in agentPrototypes)
+        {
+            var computerAgent = agent.GetComponent<ComputerAgent>();
+            for (var i = 0; i < computerAgent.quantity; i++)
+            {
+                var obj = computerAgent.Spawn(RandomPositionOnNavMesh(0.3f), transform);
+
+                // Make agent subject to planet's gravitational pull.
+                GetComponent<GravityField>().subjects.Add(obj);
+            }
+        }
+    }
+
+    public delegate void OnRaycastHit(RaycastHit hit);
+
+    // Get a random position on the planet where land objects can spawn.
+    public Vector3 RandomPositionOnNavMesh(float elevation = 1f)
+    {
+        Vector3? vec = null;
+        RaycastToSurface(Random.insideUnitSphere, (hit) => {
+            if (hit.collider.tag == Constants.Tags.Ground && IsPointOnNavMesh(hit.point))
+            {
+
+                vec = hit.point + (hit.point - transform.position).normalized * elevation;
+            }
+        });
+        return vec == null ? RandomPositionOnNavMesh() : vec.Value;
+    }
+
+    public bool IsPointOnNavMesh(Vector3 pos)
+    {
+        NavMeshHit hit;
+
+        if (NavMesh.SamplePosition(pos, out hit, 1, NavMesh.AllAreas))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool IsAboveWater(Vector3 pos)
+    {
+        return (pos - transform.position).magnitude > radius + waterLevelOffset;
+    }
+
+    // Raycast from (point in space by extending from planet center in direction of norm) to planet center.
+    public void RaycastToSurface(Vector3 norm, OnRaycastHit onHit)
+    {
+        var pointAbovePlanet = transform.position + norm * radius * 1.5f;
+        RaycastHit hit;
+        Ray ray = new Ray(pointAbovePlanet, -norm);
+
+        if (Physics.Raycast(ray, out hit))
+        {
+            onHit(hit);
         }
     }
 
@@ -130,12 +195,12 @@ public class Planet : MonoBehaviour
         return surface;
     }
 
-    private CurvedSurface MakeWaterSurface(Vector3 up, Transform parent)
+    private WaterSurface MakeWaterSurface(Vector3 up, Transform parent)
     {
-        var gameObj = GenerateSurfaceGameObject("Water Surface", up);
+        var gameObj = GenerateSurfaceGameObject("Water Surface", Vector3.up);
         gameObj.transform.parent = parent;
         gameObj.AddComponent<MeshRenderer>().sharedMaterials = waterMaterials;
-        var surface = new CurvedSurface(resolution, radius + waterLevelOffset);
+        var surface = new WaterSurface(resolution, radius + waterLevelOffset, up);
         surface.GenerateMesh();
         gameObj.GetComponent<MeshFilter>().sharedMesh = surface.mesh;
         gameObj.AddComponent<AQUAS_Lite.AQUAS_Lite_Reflection>().ignoreOcclusionCulling = true;

@@ -26,7 +26,7 @@ public class PlayerController : MonoBehaviour
     protected int attackIdx = 0;
 
     // Start is called before the first frame update
-    void Start()
+    public virtual void Start()
     {
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();

@@ -17,31 +17,6 @@ public class PlanetSurface : CurvedSurface
 
     public override float GetElevation(Vector3 normal)
     {
-        var elevation = 0f;
-        var layerOutputs = new float[noiseLayers.Length];
-        for (var i = 0; i < noiseLayers.Length; i++)
-        {
-            var noiseLayer = noiseLayers[i];
-            if (!noiseLayer.enabled)
-            {
-                continue;
-            }
-
-            var h = noiseLayer.Eval(transform.rotation * normal);
-            layerOutputs[i] = h;
-            foreach (var maskIdx in noiseLayer.maskIndices)
-            {
-                var maskLayer = noiseLayers[maskIdx];
-                if (maskLayer.enabled && maskLayer.blendMode != NoiseLayer.BlendMode.Layer)
-                {
-                    layerOutputs[i] *= layerOutputs[maskIdx];
-                }
-            }
-            if (noiseLayer.blendMode != NoiseLayer.BlendMode.Mask)
-            {
-                elevation += layerOutputs[i];
-            }
-        }
-        return elevation;
+        return NoiseLayer.Eval(noiseLayers, transform.rotation * normal);
     }
 }

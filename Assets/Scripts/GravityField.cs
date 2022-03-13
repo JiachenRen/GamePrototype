@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class GravityField : MonoBehaviour
 {
-    public List<GameObject> objects;
+    public List<GameObject> subjects;
 
     // Acceleration towards center due to gravity
     public float gravitationalPull = 9.8f;
@@ -13,8 +13,15 @@ public class GravityField : MonoBehaviour
     // Update is called once per frame
     public void Update()
     {
-        foreach (var obj in objects)
+        for (var i = subjects.Count - 1; i >= 0; i--)
         {
+            var obj = subjects[i];
+            if (obj == null)
+            {
+                subjects.RemoveAt(i);
+                continue;
+            }
+
             var rb = obj.GetComponent<Rigidbody>();
             if (rb != null)
             {

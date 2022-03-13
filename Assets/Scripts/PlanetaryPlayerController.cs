@@ -7,7 +7,12 @@ public class PlanetaryPlayerController : PlayerController
 {
     public Planet planet;
     
+    public override void Start()
+    {
+        base.Start();
 
+        planet.GetComponent<GravityField>().subjects.Add(gameObject);
+    }
     Vector3 up
     {
         get { return (transform.position - planet.transform.position).normalized; }

@@ -11,18 +11,13 @@ public class PlanetaryForest : Forest
         for (int i = 0; i < treesToSpawn; i++)
         {
             var norm = Random.insideUnitSphere;
-            var pointAbovePlanet = planet.transform.position + norm * planet.radius * 1.5f;
-            RaycastHit hit;
-            Ray ray = new Ray(pointAbovePlanet, -norm);
-
-            if (Physics.Raycast(ray, out hit))
+            planet.RaycastToSurface(norm, (hit) =>
             {
-                var dist = (hit.point - planet.transform.position).magnitude;
-                if (dist > planet.waterLevelOffset + planet.radius && hit.transform.tag == Constants.Tags.Ground)
+                if (planet.IsAboveWater(hit.point) && hit.transform.tag == Constants.Tags.Ground)
                 {
                     CreateTree(hit.point, Quaternion.FromToRotation(Vector3.up, norm)).transform.parent = hit.transform;
                 }
-            }
+            });
         }
     }
 }

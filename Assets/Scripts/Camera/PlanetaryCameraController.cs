@@ -5,13 +5,15 @@ public class PlanetaryCameraController : CameraController
 {
     public void LateUpdate()
     {
-        var playerRot = player.transform.rotation;
-        var camRot = Quaternion.AngleAxis(yawOffset * yawSpeed, player.transform.up);
-        var camForward = Vector3.ProjectOnPlane(camRot * Vector3.forward, player.transform.up).normalized;
-        var camPosition = player.transform.position + player.transform.up * elevation - camForward * distance;
+        var playerUp = player.transform.up;
+        var playerPos = player.transform.position;
+
+        var camRot = Quaternion.AngleAxis(YawOffset * yawSpeed, playerUp);
+        var camForward = Vector3.ProjectOnPlane(camRot * Vector3.forward, playerUp).normalized;
+        var camPosition = playerPos + playerUp * elevation - camForward * distance;
         transform.position = camPosition;
         transform.LookAt(
-            player.transform.position + player.transform.up * (pitchAdjustment + pitchFreedom * pitchOffset),
-            player.transform.up);
+            playerPos + playerUp * (pitchOffset + pitchFreedom * PitchOffset),
+            playerUp);
     }
 }

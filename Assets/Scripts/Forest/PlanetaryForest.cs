@@ -1,3 +1,4 @@
+using Terrain;
 using UnityEngine;
 
 public class PlanetaryForest : Forest

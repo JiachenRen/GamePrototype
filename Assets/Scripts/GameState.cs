@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class GameState: MonoBehaviour
 {
@@ -38,7 +39,7 @@ public class GameState: MonoBehaviour
 
     private void Init()
     {
-        Resume();
+        
     }
 
     public static void TogglePlay()

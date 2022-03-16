@@ -1878,7 +1878,7 @@ ModelImporter:
         intParameter: 0
         messageOptions: 0
       - time: 0.8309859
-        functionName: FoortR
+        functionName: FootR
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0

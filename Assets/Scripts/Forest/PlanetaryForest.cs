@@ -12,7 +12,7 @@ public class PlanetaryForest : Forest
             var norm = Random.insideUnitSphere;
             planet.RaycastToSurface(norm, hit =>
             {
-                if (planet.IsAboveWater(hit.point) && hit.transform.CompareTag(Constants.Tags.Ground))
+                if (planet.IsAboveWater(hit.point) && hit.transform.CompareTag(Constants.Tags.TerrainSurface))
                     CreateTree(hit.point, Quaternion.FromToRotation(Vector3.up, norm)).transform.parent = hit.transform;
             });
         }

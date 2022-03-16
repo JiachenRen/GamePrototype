@@ -2,17 +2,12 @@ using UnityEngine;
 
 public class GroundCheck : MonoBehaviour
 {
-    private int groundContactCount;
-
-    public bool airborne => groundContactCount <= 0;
-
-    public void OnCollisionEnter(Collision collision)
+    public string checkAgainst = Constants.Tags.TerrainSurface;
+    public float tolerance = 0.1f;
+    public bool IsGrounded()
     {
-        if (collision.gameObject.CompareTag(Constants.Tags.Ground)) groundContactCount++;
-    }
-
-    public void OnCollisionExit(Collision collision)
-    {
-        if (collision.gameObject.CompareTag(Constants.Tags.Ground)) groundContactCount--;
+        var t = transform;
+        var hit = Physics.Raycast(t.position, -t.up, out var hitInfo,  tolerance, Physics.AllLayers);
+        return hit && hitInfo.collider.CompareTag(checkAgainst);
     }
 }

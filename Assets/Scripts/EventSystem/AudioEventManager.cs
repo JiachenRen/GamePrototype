@@ -75,10 +75,15 @@ namespace EventSystem
 
         private void OnAudioEvent(AudioSourceInfo info, AudioSource source)
         {
+            var key = info.ToString();
+            if (!audioDict.ContainsKey(key))
+            {
+                return;
+            }
             var clipGroup = audioDict[info.ToString()];
             if (clipGroup != null)
             {
-                source.PlayOneShot(clipGroup.GetRandomClip());
+                source.PlayOneShot(clipGroup.GetRandomClip(), clipGroup.volumeScale);
             }
         }
     }

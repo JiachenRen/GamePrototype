@@ -11,7 +11,7 @@ namespace EventSystem
 
         private static EventManager _eventManager;
 
-        private bool initialized = false;
+        private bool initialized;
 
         public static EventManager instance
         {

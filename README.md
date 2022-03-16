@@ -6,6 +6,7 @@ Move with `WASD`. Move mouse cursor to change move direction. Hold down `shift` 
 
 Use `Environment` to set lighting to `Day`, `Night`, or `Dusk` dynamically.
 
+Press `1` and `2` to switch between characters.
 ## Packages
 
 ### Animation clips

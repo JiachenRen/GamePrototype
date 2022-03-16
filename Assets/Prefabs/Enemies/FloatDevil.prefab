@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 8797979875836122454}
   - component: {fileID: 8797979875836122449}
   - component: {fileID: 8797979875836122448}
-  - component: {fileID: 8797979875836122451}
   - component: {fileID: 8797979875836122450}
   - component: {fileID: 1487647499846730189}
   m_Layer: 0
@@ -62,23 +61,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d18b6fc70aa96a94a9f28f6a0344872d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hp: 100
+  quantity: 0
+  prototype: {fileID: 0}
   lookRadius: 10
   attackRadius: 2
   player: {fileID: 0}
---- !u!114 &8797979875836122451
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8797979875836122541}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4acf2d358c177143baa64992d3b97f5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  HP: 100
-  player: {fileID: 0}
+  planet: {fileID: 0}
 --- !u!54 &8797979875836122450
 Rigidbody:
   m_ObjectHideFlags: 0

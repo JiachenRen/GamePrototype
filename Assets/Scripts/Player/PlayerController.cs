@@ -1,6 +1,7 @@
 using Audio;
 using EventSystem;
 using EventSystem.Events;
+using Player.Characters;
 using Terrain;
 using UnityEngine;
 using static UnityEngine.InputSystem.InputAction;
@@ -11,7 +12,7 @@ namespace Player
     public class PlayerController : MonoBehaviour
     {
         private static readonly int Jump = Animator.StringToHash("Jump");
-        private static readonly int UseLandAnimation = Animator.StringToHash("Land Animation");
+        private static readonly int UseLandAnimation = Animator.StringToHash("Landing Animation");
         private static readonly int LandTrigger = Animator.StringToHash("Land");
         private static readonly int VelX = Animator.StringToHash("Vel X");
         private static readonly int VelY = Animator.StringToHash("Vel Y");
@@ -25,40 +26,39 @@ namespace Player
 
         public Planet planet;
 
-        private bool accelerating;
+        public BaseCharacter character;
 
-        private Animator anim;
+        [HideInInspector] public bool accelerating;
+
+        [HideInInspector] public Rigidbody rb;
 
         private int attackIdx;
+
+        private AudioSource audioSource;
 
         private GroundCheck groundCheck;
 
         private bool jumpStarted;
 
-        private Rigidbody rb;
-
-        private bool stasis = true;
-
         private Vector3 vel = Vector3.zero;
-
-        private AudioSource audioSource;
 
         private TerrainType currentTerrain => planet.GetTerrainAt(transform.position);
 
         private Vector3 up => (transform.position - planet.transform.position).normalized;
 
+        private Animator anim => character.anim;
+
         // Start is called before the first frame update
         public void Start()
         {
-            anim = GetComponent<Animator>();
-            rb = GetComponent<Rigidbody>();
             groundCheck = GetComponent<GroundCheck>();
             audioSource = GetComponent<AudioSource>();
-
-            // Enter stasis until ground contact.
-            anim.speed = 0f;
+            rb = GetComponent<Rigidbody>();
 
             planet.GetComponent<GravityField>().subjects.Add(gameObject);
+
+            // Disable all other characters
+            SwitchCharacter(character.name);
         }
 
         public void Update()
@@ -67,35 +67,22 @@ namespace Player
             transform.rotation = Quaternion.FromToRotation(Vector3.up, up);
             var ray = Camera.main!.ScreenPointToRay(new Vector2(Screen.width / 2f, Screen.height / 2f));
             var lookDirection = Vector3.ProjectOnPlane(ray.direction, up);
-            transform.rotation = Quaternion.LookRotation(lookDirection, up);
+            var t = transform;
+            t.rotation = Quaternion.LookRotation(lookDirection, up);
+            if (character)
+                character.UpdateTransform(t, vel);
 
-            var position = transform.position;
-            Debug.DrawRay(position, transform.forward * 10, Color.blue);
-            Debug.DrawRay(position, transform.right * 10, Color.red);
-            Debug.DrawRay(position, transform.up * 10, Color.green);
+            var position = t.position;
+            Debug.DrawRay(position, t.forward * 10, Color.blue);
+            Debug.DrawRay(position, t.right * 10, Color.red);
+            Debug.DrawRay(position, t.up * 10, Color.green);
         }
 
-        public void OnAnimatorMove()
-        {
-            var stateInfo = anim.GetCurrentAnimatorStateInfo(0);
-            if (!stateInfo.IsTag("No Root Motion"))
-            {
-                rb.MovePosition(anim.rootPosition);
-                rb.MoveRotation(anim.rootRotation);
-            }
-        }
+        // - Mark: Character delegates
 
         public void OnCollisionEnter(Collision collision)
         {
-            // Contact with ground, start spawn animation.
-            if (!groundCheck.airborne && stasis)
-                if (stasis)
-                {
-                    stasis = false;
-                    anim.speed = 1;
-                }
-
-            if (jumpStarted && !groundCheck.airborne)
+            if (jumpStarted && groundCheck.IsGrounded())
             {
                 jumpStarted = false;
                 anim.SetTrigger(LandTrigger);
@@ -103,6 +90,36 @@ namespace Player
                 EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(audioInfo, audioSource);
             }
         }
+
+        private Vector3 ForwardForce(float forceMultiplier)
+        {
+            var t = transform;
+            var forward = t.forward;
+            var force = forward * jumpForwardForceMultiplier;
+            var forcePerp = t.right * jumpUpwardForceMultiplier;
+            force = force * vel.y + forcePerp * vel.x;
+            return force;
+        }
+
+        public void SwitchCharacter(string name)
+        {
+            foreach (Transform t in transform)
+            {
+                var c = t.GetComponent<BaseCharacter>();
+                if (c == null) continue;
+                if (c.name == name)
+                {
+                    character = c;
+                    c.gameObject.SetActive(true);
+                }
+                else
+                {
+                    c.gameObject.SetActive(false);
+                }
+            }
+        }
+
+        // - Mark: InputSystem handles
 
         public void OnMove(CallbackContext ctx)
         {
@@ -123,9 +140,9 @@ namespace Player
         {
             if (jumpStarted) return;
             jumpStarted = true;
-            var force = ForwardForce(jumpForwardForceMultiplier) * (accelerating ? 2 : 1);
-            force += up * 20 * rb.mass;
-            rb.AddForce(force, ForceMode.Impulse);
+            var acc = ForwardForce(jumpForwardForceMultiplier) * (accelerating ? 2 : 1);
+            acc += up * jumpUpwardForceMultiplier;
+            rb.AddForce(acc * rb.mass, ForceMode.Acceleration);
             anim.SetBool(UseLandAnimation, true);
             anim.SetTrigger(Jump);
             var audioInfo = new AudioSourceInfo(AudioActor.Player, AudioAction.Jump, currentTerrain);
@@ -134,7 +151,7 @@ namespace Player
 
         public void OnLeftMouseClick(CallbackContext ctx)
         {
-            if (ctx.performed && CanAttack())
+            if (ctx.performed && character.CanAttack())
             {
                 // Alternate between left and right punches.
                 var form = attackIdx % 2 == 0 ? 2 : 5;
@@ -146,50 +163,23 @@ namespace Player
 
         public void OnSkillQ(CallbackContext ctx)
         {
-            if (ctx.started && CanAttack()) anim.SetTrigger(SkillQ);
+            if (ctx.started && character.CanAttack()) anim.SetTrigger(SkillQ);
         }
 
-        private Vector3 ForwardForce(float forceMultiplier)
-        {
-            var t = transform;
-            var forward = t.forward;
-            var mass = rb.mass;
-            var force = forward * mass * jumpForwardForceMultiplier;
-            var forcePerp = t.right * mass * jumpUpwardForceMultiplier;
-            force = force * vel.y + forcePerp * vel.x;
-            return force;
-        }
-
-        private bool CanAttack()
-        {
-            var stateInfo = anim.GetCurrentAnimatorStateInfo(0);
-            return stateInfo.IsTag("Idle") && !anim.IsInTransition(0);
-        }
-
-        private void FootStep()
+        public void OnFootStep()
         {
             var action = accelerating ? AudioAction.RunStep : AudioAction.WalkStep;
             var audioInfo = new AudioSourceInfo(AudioActor.Player, action, currentTerrain);
             EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(audioInfo, audioSource);
         }
 
-        private void FootL()
-        {
-            FootStep();
-        }
-
-        private void FootR()
-        {
-            FootStep();
-        }
-
-        private void Land()
+        public void OnLand()
         {
             var audioInfo = new AudioSourceInfo(AudioActor.Player, AudioAction.Land, currentTerrain);
             EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(audioInfo, audioSource);
         }
 
-        private void Hit()
+        public void OnHit()
         {
             var audioInfo = new AudioSourceInfo(AudioActor.Player, AudioAction.Attack, currentTerrain);
             EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(audioInfo, audioSource);

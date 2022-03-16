@@ -23,15 +23,13 @@ public class CameraController : MonoBehaviour
     // Vertical rotation offset
     protected float PitchOffset;
 
-    private bool playMode = true;
-
     // Horizontal rotation offset
     protected float YawOffset;
 
-    // Start is called before the first frame update
-    private void Start()
+    public float yawOffset
     {
-        Cursor.lockState = CursorLockMode.Locked;
+        get => YawOffset;
+        set => YawOffset = value;
     }
 
     private void LateUpdate()
@@ -47,7 +45,7 @@ public class CameraController : MonoBehaviour
 
     public void OnMouseDelta(CallbackContext ctx)
     {
-        if (!playMode) return;
+        if (!GameState.instance.playing) return;
         var delta = ctx.ReadValue<Vector2>();
         YawOffset += delta.x / Screen.width;
         PitchOffset += delta.y / Screen.height;
@@ -63,11 +61,5 @@ public class CameraController : MonoBehaviour
         relativeDistance = Mathf.Clamp(relativeDistance, 0, 1);
         relativeElevation += displacement.y;
         relativeElevation = Mathf.Clamp(relativeElevation, 0, 1);
-    }
-
-    public void OnEscape(CallbackContext ctx)
-    {
-        playMode = !playMode;
-        Cursor.lockState = playMode ? CursorLockMode.Locked : CursorLockMode.None;
     }
 }

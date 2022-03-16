@@ -1,3 +1,4 @@
+using Player;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.SceneManagement;
@@ -17,7 +18,7 @@ public class FloatDevil : ComputerAgent
     private void Start()
     {
         anim = GetComponentInChildren<Animator>();
-        playerAnim = player.GetComponent<Animator>();
+        playerAnim = player.GetComponent<PlayerController>().character.anim; // Todo: dynamically evaluate
         navMeshAgent = GetComponent<NavMeshAgent>();
         FacePlayer();
     }
@@ -39,9 +40,6 @@ public class FloatDevil : ComputerAgent
         if (hp <= 0)
         {
             Die();
-            Cursor.visible = true;
-            Screen.lockCursor = false;
-            UnityEngine.SceneManagement.SceneManager.LoadScene("GameOver");
         }
     }
 
@@ -74,7 +72,7 @@ public class FloatDevil : ComputerAgent
         var isAttacking = playerAnim.GetCurrentAnimatorStateInfo(0).IsTag("Attack");
         if (isAttacking)
         {
-            if (other.gameObject.name == "Player")
+            if (other.gameObject.GetComponent<PlayerController>())
             {
                 print("player hit me with hand, -10HP");
                 hp -= 10;

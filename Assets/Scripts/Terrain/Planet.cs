@@ -18,6 +18,7 @@ namespace Terrain
         public float waterLevelOffset;
 
         public Material surfaceMaterial;
+        public PhysicMaterial surfacePhysicMaterial;
         public Material[] waterMaterials;
 
         public NoiseLayer[] noiseLayers;
@@ -112,17 +113,15 @@ namespace Terrain
             Vector3? vec = null;
             RaycastToSurface(Random.insideUnitSphere, hit =>
             {
-                if (hit.collider.CompareTag(Constants.Tags.Ground) && IsPointOnNavMesh(hit.point))
+                if (hit.collider.CompareTag(Constants.Tags.TerrainSurface) && IsPointOnNavMesh(hit.point))
                     vec = hit.point + (hit.point - transform.position).normalized * elevation;
             });
-            return vec == null ? RandomPositionOnNavMesh() : vec.Value;
+            return vec ?? RandomPositionOnNavMesh();
         }
 
         public bool IsPointOnNavMesh(Vector3 pos)
         {
-            if (NavMesh.SamplePosition(pos, out _, 1, NavMesh.AllAreas)) return true;
-
-            return false;
+            return NavMesh.SamplePosition(pos, out _, 1, NavMesh.AllAreas);
         }
 
         public bool IsAboveWater(Vector3 pos)
@@ -151,11 +150,13 @@ namespace Terrain
         private PlanetSurface MakePlanetSurface(Vector3 up)
         {
             var gameObj = GenerateSurfaceGameObject("Surface", up);
-            gameObj.tag = Constants.Tags.Ground;
+            gameObj.tag = Constants.Tags.TerrainSurface;
             gameObj.AddComponent<MeshRenderer>().sharedMaterial = surfaceMaterial;
             var surface = new PlanetSurface(resolution, radius, gameObj.transform, noiseLayers);
             surface.GenerateMesh();
-            gameObj.AddComponent<MeshCollider>().sharedMesh = surface.mesh;
+            var meshCollider = gameObj.AddComponent<MeshCollider>();
+            meshCollider.sharedMesh = surface.mesh;
+            meshCollider.sharedMaterial = surfacePhysicMaterial;
             gameObj.GetComponent<MeshFilter>().sharedMesh = surface.mesh;
             surfaceGameObjects.Add(gameObj);
             return surface;

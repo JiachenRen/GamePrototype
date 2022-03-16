@@ -7,6 +7,8 @@ namespace Audio
     [System.Serializable]
     public class AudioClipGroup
     {
+        [Range(0, 1)]
+        public float volumeScale = 1f;
         public AudioSourceInfo audioSourceInfo;
         public AudioClip[] audioClips;
 

@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Environment : RenderInEditor
 {
     public Lighting lighting = Lighting.Day;
     public GameObject lightsRoot;
     public GameObject player;
+
+    public TMPro.TMP_Dropdown myDrop;
 
     [SerializeField] public EnvConfig[] envConfigs;
 
@@ -32,8 +35,14 @@ public class Environment : RenderInEditor
         UpdateEnvironment();
     }
 
-    private void ApplyLighting()
+    public void ApplyLighting()
     {
+        if(myDrop.value == 0) lighting = Lighting.Day;
+        else if (myDrop.value == 1) lighting = Lighting.Night;
+        else if (myDrop.value == 2) lighting = Lighting.Dusk;
+
+        Debug.Log("Applying lighting");
+        
         var config = configs[lighting];
 
         // First deactivate all lights
@@ -50,6 +59,9 @@ public class Environment : RenderInEditor
     private void UpdateEnvironment()
     {
         configs = new Dictionary<Lighting, EnvConfig>();
+        
+
+
         foreach (var config in envConfigs) configs.Add(config.lighting, config);
 
         ApplyLighting();

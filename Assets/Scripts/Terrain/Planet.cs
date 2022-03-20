@@ -3,6 +3,7 @@ using AQUAS_Lite;
 using Terrain.Surfaces;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 namespace Terrain
 {
@@ -13,11 +14,13 @@ namespace Terrain
         private static readonly Vector3[] Directions =
             {Vector3.down, Vector3.up, Vector3.forward, Vector3.back, Vector3.left, Vector3.right};
 
+        public TMPro.TMP_Dropdown myDrop;
+        
         public float radius = 100;
         public int resolution = 100;
         public float waterLevelOffset;
 
-        public Material surfaceMaterial;
+        public Material[] surfaceMaterials;
         public PhysicMaterial surfacePhysicMaterial;
         public Material[] waterMaterials;
 
@@ -34,6 +37,8 @@ namespace Terrain
         private PlanetSurface[] surfaces;
         private UnwalkableSurface[] unwalkableMasks;
         private WaterSurface[] waterSurfaces;
+
+        private int index = 0;
 
         // Start is called before the first frame update
         public void Start()
@@ -64,7 +69,7 @@ namespace Terrain
             var i = 0;
             foreach (var dir in Directions)
             {
-                surfaces[i] = MakePlanetSurface(dir);
+                surfaces[i] = MakePlanetSurface(dir, 0);
                 waterSurfaces[i] = MakeWaterSurface(dir, surfaceGameObjects[i].transform);
                 unwalkableMasks[i] = MakeUnwalkableSurface(dir, surfaceGameObjects[i].transform);
                 i++;
@@ -147,11 +152,31 @@ namespace Terrain
             return gameObj;
         }
 
-        private PlanetSurface MakePlanetSurface(Vector3 up)
+        
+        public void changeSurface(){
+            //surfaceGameObjects.Clear();
+            if(myDrop.value == 0) index = 0;
+            else if (myDrop.value == 1) index = 1;
+            else if (myDrop.value == 2) index = 2;
+            // var i = 0;
+            // foreach (var dir in Directions)
+            // {
+            //     surfaces[i] = MakePlanetSurface(dir, index); 
+            //     i++;
+            // }
+            foreach(var gameObj in surfaceGameObjects){
+                //gameObj.tag = Constants.Tags.TerrainSurface;
+                gameObj.GetComponent<MeshRenderer>().sharedMaterial = surfaceMaterials[index];
+            }
+            
+            
+        }
+
+        private  PlanetSurface MakePlanetSurface(Vector3 up, int index)
         {
             var gameObj = GenerateSurfaceGameObject("Surface", up);
             gameObj.tag = Constants.Tags.TerrainSurface;
-            gameObj.AddComponent<MeshRenderer>().sharedMaterial = surfaceMaterial;
+            gameObj.AddComponent<MeshRenderer>().sharedMaterial = surfaceMaterials[index];
             var surface = new PlanetSurface(resolution, radius, gameObj.transform, noiseLayers);
             surface.GenerateMesh();
             var meshCollider = gameObj.AddComponent<MeshCollider>();

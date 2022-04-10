@@ -69,7 +69,7 @@ namespace Terrain
             var i = 0;
             foreach (var dir in Directions)
             {
-                surfaces[i] = MakePlanetSurface(dir, 0);
+                surfaces[i] = MakePlanetSurface(dir, 1);
                 waterSurfaces[i] = MakeWaterSurface(dir, surfaceGameObjects[i].transform);
                 unwalkableMasks[i] = MakeUnwalkableSurface(dir, surfaceGameObjects[i].transform);
                 i++;

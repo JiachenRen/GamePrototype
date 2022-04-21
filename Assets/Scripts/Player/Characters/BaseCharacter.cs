@@ -7,7 +7,7 @@ namespace Player.Characters
     {
         public string characterName;
 
-        [HideInInspector] public Animator anim;
+        public Animator anim;
 
         [HideInInspector] public Rigidbody rb;
 

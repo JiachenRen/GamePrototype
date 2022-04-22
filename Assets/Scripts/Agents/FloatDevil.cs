@@ -2,11 +2,16 @@ using Player;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class FloatDevil : ComputerAgent
 {
     public float lookRadius = 10f;
     public float attackRadius = 2f;
+    private float health;
+
+    public Slider slider;
+    public GameObject healthBarUI;
 
     public GameObject player;
     public GameObject planet;
@@ -18,6 +23,8 @@ public class FloatDevil : ComputerAgent
     private void Start()
     {
         anim = GetComponentInChildren<Animator>();
+        health = hp;
+        slider.value = CalculateHealth();
         playerAnim = player.GetComponent<PlayerController>().character.anim; // Todo: dynamically evaluate
         navMeshAgent = GetComponent<NavMeshAgent>();
         FacePlayer();
@@ -26,6 +33,15 @@ public class FloatDevil : ComputerAgent
     private void Update()
     {
         var distanceToPlayer = Vector3.Distance(player.transform.position, transform.position);
+        slider.value = CalculateHealth();
+        if (health < hp) {
+            healthBarUI.SetActive(true);
+        }
+        if (health <= 0)
+        {
+            Die();
+        }
+
         if (distanceToPlayer < attackRadius)
         {
             // attack
@@ -35,11 +51,6 @@ public class FloatDevil : ComputerAgent
         else if (distanceToPlayer < lookRadius && navMeshAgent.isOnNavMesh)
         {
             navMeshAgent.SetDestination(player.transform.position);
-        }
-        
-        if (hp <= 0)
-        {
-            Die();
         }
     }
 
@@ -70,12 +81,14 @@ public class FloatDevil : ComputerAgent
     private void HitDetection(Collision other)
     {
         var isAttacking = playerAnim.GetCurrentAnimatorStateInfo(0).IsTag("Attack");
-        if (isAttacking)
+        Debug.Log(isAttacking);
+        if (isAttacking != null)
         {
+            Debug.Log("hit!");
             if (other.gameObject.GetComponent<PlayerController>())
             {
                 print("player hit me with hand, -10HP");
-                hp -= 10;
+                health -= 10;
             }
 
             anim.SetTrigger("getHit");
@@ -85,6 +98,15 @@ public class FloatDevil : ComputerAgent
     private void Die()
     {
         anim.SetTrigger("die");
-        if (anim.GetCurrentAnimatorStateInfo(0).IsName("dead")) Destroy(gameObject);
+        Debug.Log("dead");
+        if (anim.GetCurrentAnimatorStateInfo(0).IsName("dead")) 
+        {
+            Destroy(gameObject);
+        }
     }
+
+    private float CalculateHealth() 
+    {
+        return health/hp;
+    } 
 }

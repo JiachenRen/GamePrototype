@@ -7,6 +7,7 @@ public class InGameMenu : MonoBehaviour
     // Start is called before the first frame update
 
     private CanvasGroup canvasGroup;
+    public GameObject hub;
 
     private void Awake()
     {
@@ -31,6 +32,7 @@ public class InGameMenu : MonoBehaviour
         canvasGroup.interactable = true;
         canvasGroup.blocksRaycasts = true;
         canvasGroup.alpha = 1f;
+        hub.SetActive(false);
     }
 
     public void Hide()
@@ -38,5 +40,6 @@ public class InGameMenu : MonoBehaviour
         canvasGroup.interactable = false;
         canvasGroup.blocksRaycasts = false;
         canvasGroup.alpha = 0f;
+        hub.SetActive(true);
     }
 }

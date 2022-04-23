@@ -25,21 +25,22 @@ public class FloatDevil : ComputerAgent
         anim = GetComponentInChildren<Animator>();
         health = hp;
         slider.value = CalculateHealth();
-        playerAnim = player.GetComponent<PlayerController>().character.anim; // Todo: dynamically evaluate
         navMeshAgent = GetComponent<NavMeshAgent>();
         FacePlayer();
     }
 
     private void Update()
     {
+        if (anim.GetCurrentAnimatorStateInfo(0).IsName("dead")) 
+        {
+            Destroy(gameObject);
+            return;
+        }
+        
         var distanceToPlayer = Vector3.Distance(player.transform.position, transform.position);
         slider.value = CalculateHealth();
         if (health < hp) {
             healthBarUI.SetActive(true);
-        }
-        if (health <= 0)
-        {
-            Die();
         }
 
         if (distanceToPlayer < attackRadius)
@@ -72,41 +73,33 @@ public class FloatDevil : ComputerAgent
     // facing player with smooth rotation
     private void FacePlayer()
     {
-        var direction = (player.transform.position - transform.position).normalized;
-        var up = (transform.position - planet.transform.position).normalized;
+        var t = transform;
+        var position = t.position;
+        var direction = (player.transform.position - position).normalized;
+        var up = (position - planet.transform.position).normalized;
         var lookAt = Quaternion.LookRotation(Vector3.ProjectOnPlane(direction, up), up);
         transform.rotation = lookAt;
     }
 
     private void HitDetection(Collision other)
     {
+        playerAnim = player.GetComponent<PlayerController>().character.anim;
         var isAttacking = playerAnim.GetCurrentAnimatorStateInfo(0).IsTag("Attack");
-        Debug.Log(isAttacking);
-        if (isAttacking != null)
-        {
-            Debug.Log("hit!");
-            if (other.gameObject.GetComponent<PlayerController>())
-            {
-                print("player hit me with hand, -10HP");
-                health -= 10;
-            }
+        var part = other.GetContact(0).otherCollider;
+        if (!part.CompareTag("Weapon") || !isAttacking) return;
 
-            anim.SetTrigger("getHit");
-        }
-    }
+        print($"[FloatDevil] hit by {part.name}, health -= 10");
+        anim.SetTrigger("getHit");
+        health -= 10;
 
-    private void Die()
-    {
-        anim.SetTrigger("die");
-        Debug.Log("dead");
-        if (anim.GetCurrentAnimatorStateInfo(0).IsName("dead")) 
+        if (health <= 0)
         {
-            Destroy(gameObject);
+            anim.SetTrigger("die");
         }
     }
 
     private float CalculateHealth() 
     {
-        return health/hp;
+        return health / hp;
     } 
 }

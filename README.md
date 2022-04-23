@@ -2,11 +2,22 @@
 Game prototype for CS 6457 Video Game Design.
 
 ## Controls
-Move with `WASD`. Move mouse cursor to change move direction. Hold down `shift` to run. Press `space` to jump. Press `Q` to do a rapid punch + upper cut + dive roll combo.
+Move with `WASD`. Move mouse cursor to change move direction. 
+
+Hold down `shift` to run. Press `space` to jump. 
+
+Press `Q` to do a rapid punch + upper cut + dive roll combo.
 
 Use `Environment` to set lighting to `Day`, `Night`, or `Dusk` dynamically.
 
 Press `1` and `2` to switch between characters.
+
+Mouse wheel to zoom in/out.
+
+Press `ESC` to show/hide in-game menu.
+
+Press `y` to toggle minimap orientation (follow player direction / north up).
+
 ## Packages
 
 ### Animation clips

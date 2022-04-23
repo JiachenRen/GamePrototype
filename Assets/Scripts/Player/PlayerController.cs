@@ -87,6 +87,11 @@ namespace Player
             var position = t.position;
             healthBar.value = CalculateHealth();
 
+            if (planet.WaterTooDeep(transform)) 
+            {
+                // TODO: show a breathe bar 
+            }
+
             Debug.DrawRay(position, t.forward * 10, Color.blue);
             Debug.DrawRay(position, t.right * 10, Color.red);
             Debug.DrawRay(position, t.up * 10, Color.green);

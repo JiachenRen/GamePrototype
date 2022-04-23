@@ -134,6 +134,11 @@ namespace Terrain
             return (pos - transform.position).magnitude > radius + waterLevelOffset;
         }
 
+
+        public bool WaterTooDeep(Transform playerTrans) 
+        {
+            return (playerTrans.position - transform.position + playerTrans.up).magnitude <= (radius + waterLevelOffset);
+        }
         // Raycast from (point in space by extending from planet center in direction of norm) to planet center.
         public void RaycastToSurface(Vector3 norm, OnRaycastHit onHit)
         {

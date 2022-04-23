@@ -44,8 +44,14 @@ public class GameState: MonoBehaviour
 
     public static void TogglePlay()
     {
-        instance.playing = !instance.playing;
-        UpdateCursorLockState();
+        if (instance.playing)
+        {
+            Pause();
+        }
+        else
+        {
+            Resume();
+        }
     }
 
     public static void Pause()

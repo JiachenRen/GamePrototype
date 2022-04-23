@@ -31,6 +31,7 @@ public class FloatDevil : ComputerAgent
 
     private void Update()
     {
+        if (!GameState.instance.playing) return;
         if (anim.GetCurrentAnimatorStateInfo(0).IsName("dead")) 
         {
             Destroy(gameObject);

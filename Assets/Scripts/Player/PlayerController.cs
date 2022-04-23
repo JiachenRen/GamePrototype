@@ -10,7 +10,7 @@ using UnityEngine.UI;
 namespace Player
 {
     [RequireComponent(typeof(GroundCheck))]
-    public class PlayerController : MonoBehaviour
+    public class PlayerController : Agent
     {
         private static readonly int Jump = Animator.StringToHash("Jump");
         private static readonly int UseLandAnimation = Animator.StringToHash("Landing Animation");
@@ -25,15 +25,11 @@ namespace Player
         public float jumpForwardForceMultiplier = 6;
         public float jumpUpwardForceMultiplier = 20;
 
-        // for player health bar
-        private float maxHealth = 100;
+        // Current health. Total health can be accessed via [hp]
         private float health;
-        public Slider slider;
-        public GameObject healthBarUI;
+        public Slider healthBar;
         public GameObject enemy;
         private Animator enemyAnim;
-
-
 
         public Planet planet;
 
@@ -59,14 +55,16 @@ namespace Player
 
         private Animator anim => character.anim;
 
+        private bool isPlaying => GameState.instance.playing;
+
         // Start is called before the first frame update
         public void Start()
         {
             groundCheck = GetComponent<GroundCheck>();
             audioSource = GetComponent<AudioSource>();
             rb = GetComponent<Rigidbody>();
-            health = maxHealth;
-            slider.value = CalculateHealth();
+            health = hp;
+            healthBar.value = CalculateHealth();
 
 
             planet.GetComponent<GravityField>().subjects.Add(gameObject);
@@ -87,7 +85,7 @@ namespace Player
                 character.UpdateTransform(t, vel);
 
             var position = t.position;
-            slider.value = CalculateHealth();
+            healthBar.value = CalculateHealth();
 
             Debug.DrawRay(position, t.forward * 10, Color.blue);
             Debug.DrawRay(position, t.right * 10, Color.red);
@@ -140,11 +138,12 @@ namespace Player
 
         private float CalculateHealth() 
         {
-            return health / maxHealth;
+            return health / hp;
         } 
 
         public void SwitchCharacter(string name)
         {
+            if (!isPlaying) return;
             foreach (Transform t in transform)
             {
                 var c = t.GetComponent<BaseCharacter>();
@@ -165,6 +164,7 @@ namespace Player
 
         public void OnMove(CallbackContext ctx)
         {
+            if (!isPlaying) return;
             var vel = ctx.ReadValue<Vector2>();
             this.vel.x = vel.x;
             this.vel.y = vel.y;
@@ -174,12 +174,14 @@ namespace Player
 
         public void OnAccelerate(CallbackContext ctx)
         {
+            if (!isPlaying) return;
             accelerating = ctx.action.IsPressed();
             anim.SetBool(Run, accelerating);
         }
 
         public void OnJump(CallbackContext ctx)
         {
+            if (!isPlaying) return;
             if (jumpStarted) return;
             jumpStarted = true;
             var acc = ForwardForce(jumpForwardForceMultiplier) * (accelerating ? 2 : 1);
@@ -193,6 +195,7 @@ namespace Player
 
         public void OnLeftMouseClick(CallbackContext ctx)
         {
+            if (!isPlaying) return;
             if (ctx.performed && character.CanAttack())
             {
                 // Alternate between left and right punches.
@@ -205,6 +208,7 @@ namespace Player
 
         public void OnSkillQ(CallbackContext ctx)
         {
+            if (!isPlaying) return;
             if (ctx.started && character.CanAttack()) anim.SetTrigger(SkillQ);
         }
 

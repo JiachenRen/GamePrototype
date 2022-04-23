@@ -5,6 +5,7 @@ using Player.Characters;
 using Terrain;
 using UnityEngine;
 using static UnityEngine.InputSystem.InputAction;
+using UnityEngine.UI;
 
 namespace Player
 {
@@ -23,6 +24,16 @@ namespace Player
 
         public float jumpForwardForceMultiplier = 6;
         public float jumpUpwardForceMultiplier = 20;
+
+        // for player health bar
+        private float maxHealth = 100;
+        private float health;
+        public Slider slider;
+        public GameObject healthBarUI;
+        public GameObject enemy;
+        private Animator enemyAnim;
+
+
 
         public Planet planet;
 
@@ -54,6 +65,9 @@ namespace Player
             groundCheck = GetComponent<GroundCheck>();
             audioSource = GetComponent<AudioSource>();
             rb = GetComponent<Rigidbody>();
+            health = maxHealth;
+            slider.value = CalculateHealth();
+
 
             planet.GetComponent<GravityField>().subjects.Add(gameObject);
 
@@ -73,6 +87,8 @@ namespace Player
                 character.UpdateTransform(t, vel);
 
             var position = t.position;
+            slider.value = CalculateHealth();
+
             Debug.DrawRay(position, t.forward * 10, Color.blue);
             Debug.DrawRay(position, t.right * 10, Color.red);
             Debug.DrawRay(position, t.up * 10, Color.green);
@@ -89,6 +105,7 @@ namespace Player
                 var audioInfo = new AudioSourceInfo(AudioActor.Player, AudioAction.Land, currentTerrain);
                 EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(audioInfo, audioSource);
             }
+            HitDetection(collision);
         }
 
         private Vector3 ForwardForce(float forceMultiplier)
@@ -100,6 +117,31 @@ namespace Player
             force = force * vel.y + forcePerp * vel.x;
             return force;
         }
+
+        private void HitDetection(Collision other)
+        {
+            enemyAnim = enemy.GetComponent<FloatDevil>().GetAnim();
+            var isAttacking = enemyAnim.GetCurrentAnimatorStateInfo(0).IsTag("Attack");
+            Debug.Log(isAttacking);
+            var part = other.GetContact(0).otherCollider;
+            if (!part.CompareTag("Weapon") || !isAttacking) return;
+
+            print($"[Player] hit by {part.name}, health -= 5");
+            anim.SetTrigger("getHit");
+            health -= 5;
+
+            if (health <= 0)
+            {
+                //anim.SetTrigger("die");
+                Debug.Log("die");
+            }
+        }
+
+
+        private float CalculateHealth() 
+        {
+            return health / maxHealth;
+        } 
 
         public void SwitchCharacter(string name)
         {

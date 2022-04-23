@@ -38,7 +38,9 @@ public class FloatDevil : ComputerAgent
         }
         
         var distanceToPlayer = Vector3.Distance(player.transform.position, transform.position);
+        
         slider.value = CalculateHealth();
+
         if (health < hp) {
             healthBarUI.SetActive(true);
         }
@@ -102,4 +104,9 @@ public class FloatDevil : ComputerAgent
     {
         return health / hp;
     } 
+    
+    public Animator GetAnim() 
+    {
+        return anim;
+    }
 }

@@ -1,10 +1,5 @@
-using System.Data;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
-using static UnityEngine.InputSystem.InputAction;
-using Image = UnityEngine.UIElements.Image;
 
 [ExecuteInEditMode]
 public class MinimapCameraController : MonoBehaviour
@@ -13,7 +8,7 @@ public class MinimapCameraController : MonoBehaviour
     public RawImage directionIndicator;
     public GameObject compass;
     public float elevation;
-    
+
     // Either orient to the north or according to player's orientation
     public bool northUp;
 
@@ -27,13 +22,15 @@ public class MinimapCameraController : MonoBehaviour
 
         // Update player direction indicator
         var playerUp = player.transform.up;
-        var playerForward = player.transform.forward;
-        var projUp = Vector3.ProjectOnPlane(camUp, playerUp);
-        var projForward = Vector3.ProjectOnPlane(playerForward, playerUp);
-        var rot = Quaternion.FromToRotation(projForward, projUp);
+        var indicatorAngle = Vector3.SignedAngle(
+            Vector3.ProjectOnPlane(player.transform.forward, playerUp),
+            Vector3.ProjectOnPlane(transform.up, playerUp),
+            playerUp
+        );
         directionIndicator.rectTransform.rotation = Quaternion.identity;
-        directionIndicator.rectTransform.Rotate(new Vector3(0, 0, rot.eulerAngles.y));
-        
+        if (northUp)
+            directionIndicator.rectTransform.Rotate(new Vector3(0, 0, indicatorAngle));
+
         // Update compass orientation
         compass.transform.rotation = Quaternion.identity;
         if (!northUp)

@@ -59,7 +59,7 @@ public abstract class Agent : MonoBehaviour
         attacker.damageDealt = true;
     }
 
-    protected void Die()
+    protected virtual void Die()
     {
         anim.SetTrigger(DieTrigger);
     }

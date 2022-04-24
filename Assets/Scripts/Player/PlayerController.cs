@@ -210,5 +210,12 @@ namespace Player
             var info = new AudioSourceInfo(AudioActor.Player, AudioAction.GetHit, TerrainType.All);
             EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(info, audioSource);
         }
+
+        protected override void Die()
+        {
+            base.Die();
+            var info = new AudioSourceInfo(AudioActor.Player, AudioAction.Die, TerrainType.All);
+            EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(info, audioSource);
+        }
     }
 }

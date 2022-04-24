@@ -94,4 +94,11 @@ public class FloatDevil : ComputerAgent
         var info = new AudioSourceInfo(AudioActor.ComputerAgent, AudioAction.GetHit, TerrainType.All);
         EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(info, audioSource);
     }
+    
+    protected override void Die()
+    {
+        base.Die();
+        var info = new AudioSourceInfo(AudioActor.ComputerAgent, AudioAction.Die, TerrainType.All);
+        EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(info, audioSource);
+    }
 }

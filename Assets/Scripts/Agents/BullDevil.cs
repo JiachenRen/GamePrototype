@@ -31,7 +31,7 @@ public class BullDevil : ComputerAgent {
 
     private void Update() {
         if (!GameState.instance.playing) return;
-        if (isDead) {
+        if (shouldDestroy) {
             Destroy(gameObject);
             return;
         }

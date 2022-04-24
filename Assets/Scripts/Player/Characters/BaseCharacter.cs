@@ -27,12 +27,6 @@ namespace Player.Characters
             var stateInfo = anim.GetCurrentAnimatorStateInfo(0);
             return !stateInfo.IsName("Idle") && !stateInfo.IsTag("No Root Motion");
         }
-        
-        public bool CanAttack()
-        {
-            var stateInfo = anim.GetCurrentAnimatorStateInfo(0);
-            return stateInfo.IsTag("Idle") && !anim.IsInTransition(0);
-        }
 
         public void OnAnimatorMove()
         {

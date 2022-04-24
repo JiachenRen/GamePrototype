@@ -15,5 +15,6 @@ public abstract class Constants
     public abstract class Tags
     {
         public const string TerrainSurface = "TerrainSurface";
+        public const string Weapon = "Weapon";
     }
 }

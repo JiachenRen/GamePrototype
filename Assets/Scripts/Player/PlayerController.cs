@@ -24,12 +24,8 @@ namespace Player
 
         public float jumpForwardForceMultiplier = 6;
         public float jumpUpwardForceMultiplier = 20;
-
-        // Current health. Total health can be accessed via [hp]
-        private float health;
+        
         public Slider healthBar;
-        public GameObject enemy;
-        private Animator enemyAnim;
 
         public Planet planet;
 
@@ -53,18 +49,18 @@ namespace Player
 
         private Vector3 up => (transform.position - planet.transform.position).normalized;
 
-        private Animator anim => character.anim;
+        protected override Animator anim => character.anim;
 
         private bool isPlaying => GameState.instance.playing;
 
         // Start is called before the first frame update
         public void Start()
         {
+            Init();
             groundCheck = GetComponent<GroundCheck>();
             audioSource = GetComponent<AudioSource>();
             rb = GetComponent<Rigidbody>();
-            health = hp;
-            healthBar.value = CalculateHealth();
+            healthBar.value = currentHealth / health;
 
 
             planet.GetComponent<GravityField>().subjects.Add(gameObject);
@@ -85,7 +81,7 @@ namespace Player
                 character.UpdateTransform(t, vel);
 
             var position = t.position;
-            healthBar.value = CalculateHealth();
+            healthBar.value = currentHealth / health;
 
             if (planet.WaterTooDeep(transform)) 
             {
@@ -120,31 +116,6 @@ namespace Player
             force = force * vel.y + forcePerp * vel.x;
             return force;
         }
-
-        private void HitDetection(Collision other)
-        {
-            enemyAnim = enemy.GetComponent<FloatDevil>().GetAnim();
-            var isAttacking = enemyAnim.GetCurrentAnimatorStateInfo(0).IsTag("Attack");
-            Debug.Log(isAttacking);
-            var part = other.GetContact(0).otherCollider;
-            if (!part.CompareTag("Weapon") || !isAttacking) return;
-
-            print($"[Player] hit by {part.name}, health -= 5");
-            anim.SetTrigger("getHit");
-            health -= 5;
-
-            if (health <= 0)
-            {
-                //anim.SetTrigger("die");
-                Debug.Log("die");
-            }
-        }
-
-
-        private float CalculateHealth() 
-        {
-            return health / hp;
-        } 
 
         public void SwitchCharacter(string name)
         {
@@ -201,20 +172,19 @@ namespace Player
         public void OnLeftMouseClick(CallbackContext ctx)
         {
             if (!isPlaying) return;
-            if (ctx.performed && character.CanAttack())
-            {
-                // Alternate between left and right punches.
-                var form = attackIdx % 2 == 0 ? 2 : 5;
-                attackIdx++;
-                anim.SetFloat(AttackForm, form);
-                anim.SetTrigger(Attack);
-            }
+            if (!ctx.performed || !canAttack) return;
+            
+            // Alternate between left and right punches.
+            var form = attackIdx % 2 == 0 ? 2 : 5;
+            attackIdx++;
+            anim.SetFloat(AttackForm, form);
+            anim.SetTrigger(Attack);
         }
 
         public void OnSkillQ(CallbackContext ctx)
         {
             if (!isPlaying) return;
-            if (ctx.started && character.CanAttack()) anim.SetTrigger(SkillQ);
+            if (ctx.started && canAttack) anim.SetTrigger(SkillQ);
         }
 
         public void OnFootStep()

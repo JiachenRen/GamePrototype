@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
-public class ComputerAgent : Agent
+public abstract class ComputerAgent : Agent
 {
     // Number of agents to spawn.
     public int quantity;

@@ -2,6 +2,6 @@
 {
     public enum AudioActor
     {
-        Player
+        Player, ComputerAgent
     }
 }

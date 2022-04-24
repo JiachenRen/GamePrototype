@@ -19,7 +19,6 @@ namespace Player
         private static readonly int VelY = Animator.StringToHash("Vel Y");
         private static readonly int Run = Animator.StringToHash("Run");
         private static readonly int AttackForm = Animator.StringToHash("Attack Form");
-        private static readonly int Attack = Animator.StringToHash("Attack");
         private static readonly int SkillQ = Animator.StringToHash("Skill Q");
 
         public float jumpForwardForceMultiplier = 6;
@@ -61,8 +60,7 @@ namespace Player
             audioSource = GetComponent<AudioSource>();
             rb = GetComponent<Rigidbody>();
             healthBar.value = currentHealth / health;
-
-
+            
             planet.GetComponent<GravityField>().subjects.Add(gameObject);
 
             // Disable all other characters
@@ -178,7 +176,7 @@ namespace Player
             var form = attackIdx % 2 == 0 ? 2 : 5;
             attackIdx++;
             anim.SetFloat(AttackForm, form);
-            anim.SetTrigger(Attack);
+            Attack();
         }
 
         public void OnSkillQ(CallbackContext ctx)
@@ -202,8 +200,15 @@ namespace Player
 
         public void OnHit()
         {
-            var audioInfo = new AudioSourceInfo(AudioActor.Player, AudioAction.Attack, currentTerrain);
+            var audioInfo = new AudioSourceInfo(AudioActor.Player, AudioAction.Attack, TerrainType.All);
             EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(audioInfo, audioSource);
+        }
+
+        protected override void GetHit(Agent attacker)
+        {
+            base.GetHit(attacker);
+            var info = new AudioSourceInfo(AudioActor.Player, AudioAction.GetHit, TerrainType.All);
+            EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(info, audioSource);
         }
     }
 }

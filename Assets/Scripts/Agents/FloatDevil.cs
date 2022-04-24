@@ -1,3 +1,7 @@
+using Audio;
+using EventSystem;
+using EventSystem.Events;
+using Terrain;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UI;
@@ -16,12 +20,14 @@ public class FloatDevil : ComputerAgent
     protected override Animator anim => GetComponentInChildren<Animator>();
     
     private NavMeshAgent navMeshAgent;
+    private AudioSource audioSource;
 
     protected void Start()
     {
         Init();
         slider.value = currentHealth / health;
         navMeshAgent = GetComponent<NavMeshAgent>();
+        audioSource = GetComponent<AudioSource>();
         FacePlayer();
     }
 
@@ -44,9 +50,11 @@ public class FloatDevil : ComputerAgent
 
         if (distanceToPlayer < attackRadius)
         {
-            // Attack
             FacePlayer();
-            if (canAttack) anim.SetTrigger(AttackTrigger);
+            if (canAttack)
+            {
+                Attack();
+            }
         }
         else if (distanceToPlayer < lookRadius && navMeshAgent.isOnNavMesh)
         {
@@ -78,5 +86,12 @@ public class FloatDevil : ComputerAgent
         var up = (position - planet.transform.position).normalized;
         var lookAt = Quaternion.LookRotation(Vector3.ProjectOnPlane(direction, up), up);
         transform.rotation = lookAt;
+    }
+
+    protected override void GetHit(Agent attacker)
+    {
+        base.GetHit(attacker);
+        var info = new AudioSourceInfo(AudioActor.ComputerAgent, AudioAction.GetHit, TerrainType.All);
+        EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(info, audioSource);
     }
 }

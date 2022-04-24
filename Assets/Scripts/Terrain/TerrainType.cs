@@ -2,6 +2,6 @@
 {
     public enum TerrainType
     {
-        Water, Sand
+        Water, Sand, All
     }
 }

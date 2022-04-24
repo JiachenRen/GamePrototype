@@ -326,8 +326,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6057099448509676664}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.68, z: 0}
-  m_LocalScale: {x: 10, y: 10, z: 10}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 5, y: 5, z: 5}
   m_Children: []
   m_Father: {fileID: 8797979875836122454}
   m_RootOrder: 2
@@ -480,7 +480,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d18b6fc70aa96a94a9f28f6a0344872d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hp: 100
+  health: 100
+  attackDamage: 10
+  currentHealth: 0
   quantity: 20
   prototype: {fileID: 8797979875836122541}
   lookRadius: 10

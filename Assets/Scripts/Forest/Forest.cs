@@ -1,4 +1,5 @@
 using UnityEditor;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public abstract class Forest : RenderInEditor
@@ -39,6 +40,17 @@ public abstract class Forest : RenderInEditor
         newTree.transform.parent = root.transform;
         var material = newTree.GetComponent<MeshRenderer>().sharedMaterial;
         material.shader = useWind ? wind.shader : Shader.Find("Standard");
+        newTree.layer = Constants.Layers.TerrainDetail;
+
+        // var minimapTree = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        // minimapTree.GetComponent<Collider>().enabled = false;
+        // minimapTree.transform.position = newTree.transform.position;
+        // minimapTree.transform.rotation = newTree.transform.rotation;
+        //
+        // var size = tree.GetComponent<Renderer>().bounds.size;
+        // minimapTree.transform.localScale = size;
+        // minimapTree.transform.parent = newTree.transform;
+        // minimapTree.layer = Constants.Layers.Minimap;
         return newTree;
     }
 

@@ -2197,7 +2197,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1648957019}
         m_TargetAssemblyTypeName: Terrain.Planet, Assembly-CSharp
-        m_MethodName: changeSurface
+        m_MethodName: ChangeSurface
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

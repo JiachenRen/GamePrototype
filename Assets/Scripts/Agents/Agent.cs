@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[RequireComponent(typeof(AudioSource))]
 public abstract class Agent : MonoBehaviour
 {
     private static readonly int GetHitTrigger = Animator.StringToHash("GetHit");
@@ -17,6 +18,8 @@ public abstract class Agent : MonoBehaviour
 
     protected AnimatorStateInfo animState => anim.GetCurrentAnimatorStateInfo(0);
 
+    protected AudioSource AudioSource;
+
     public bool isAttacking => animState.IsTag("Attack");
     public bool isDead => animState.IsName("Dead");
 
@@ -27,6 +30,7 @@ public abstract class Agent : MonoBehaviour
     protected void Init()
     {
         currentHealth = health;
+        AudioSource = GetComponent<AudioSource>();
     }
 
     protected void Attack()

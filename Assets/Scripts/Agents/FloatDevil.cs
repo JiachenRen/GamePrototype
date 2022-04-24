@@ -87,18 +87,4 @@ public class FloatDevil : ComputerAgent
         var lookAt = Quaternion.LookRotation(Vector3.ProjectOnPlane(direction, up), up);
         transform.rotation = lookAt;
     }
-
-    protected override void GetHit(Agent attacker)
-    {
-        base.GetHit(attacker);
-        var info = new AudioSourceInfo(AudioActor.ComputerAgent, AudioAction.GetHit, TerrainType.All);
-        EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(info, audioSource);
-    }
-    
-    protected override void Die()
-    {
-        base.Die();
-        var info = new AudioSourceInfo(AudioActor.ComputerAgent, AudioAction.Die, TerrainType.All);
-        EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(info, audioSource);
-    }
 }

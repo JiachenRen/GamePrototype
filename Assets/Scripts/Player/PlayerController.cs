@@ -36,8 +36,6 @@ namespace Player
 
         private int attackIdx;
 
-        private AudioSource audioSource;
-
         private GroundCheck groundCheck;
 
         private bool jumpStarted;
@@ -57,7 +55,6 @@ namespace Player
         {
             Init();
             groundCheck = GetComponent<GroundCheck>();
-            audioSource = GetComponent<AudioSource>();
             rb = GetComponent<Rigidbody>();
             healthBar.value = currentHealth / health;
             
@@ -100,7 +97,7 @@ namespace Player
                 jumpStarted = false;
                 anim.SetTrigger(LandTrigger);
                 var audioInfo = new AudioSourceInfo(AudioActor.Player, AudioAction.Land, currentTerrain);
-                EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(audioInfo, audioSource);
+                EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(audioInfo, AudioSource);
             }
             HitDetection(collision);
         }
@@ -164,7 +161,7 @@ namespace Player
             anim.SetBool(UseLandAnimation, true);
             anim.SetTrigger(Jump);
             var audioInfo = new AudioSourceInfo(AudioActor.Player, AudioAction.Jump, currentTerrain);
-            EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(audioInfo, audioSource);
+            EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(audioInfo, AudioSource);
         }
 
         public void OnLeftMouseClick(CallbackContext ctx)
@@ -189,33 +186,33 @@ namespace Player
         {
             var action = accelerating ? AudioAction.RunStep : AudioAction.WalkStep;
             var audioInfo = new AudioSourceInfo(AudioActor.Player, action, currentTerrain);
-            EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(audioInfo, audioSource);
+            EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(audioInfo, AudioSource);
         }
 
         public void OnLand()
         {
             var audioInfo = new AudioSourceInfo(AudioActor.Player, AudioAction.Land, currentTerrain);
-            EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(audioInfo, audioSource);
+            EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(audioInfo, AudioSource);
         }
 
         public void OnHit()
         {
             var audioInfo = new AudioSourceInfo(AudioActor.Player, AudioAction.Attack, TerrainType.All);
-            EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(audioInfo, audioSource);
+            EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(audioInfo, AudioSource);
         }
 
         protected override void GetHit(Agent attacker)
         {
             base.GetHit(attacker);
             var info = new AudioSourceInfo(AudioActor.Player, AudioAction.GetHit, TerrainType.All);
-            EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(info, audioSource);
+            EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(info, AudioSource);
         }
 
         protected override void Die()
         {
             base.Die();
             var info = new AudioSourceInfo(AudioActor.Player, AudioAction.Die, TerrainType.All);
-            EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(info, audioSource);
+            EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(info, AudioSource);
         }
     }
 }

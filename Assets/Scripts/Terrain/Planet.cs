@@ -134,11 +134,11 @@ namespace Terrain
             return (pos - transform.position).magnitude > radius + waterLevelOffset;
         }
 
-
         public bool WaterTooDeep(Transform playerTrans) 
         {
             return (playerTrans.position - transform.position + playerTrans.up).magnitude <= (radius + waterLevelOffset);
         }
+        
         // Raycast from (point in space by extending from planet center in direction of norm) to planet center.
         public void RaycastToSurface(Vector3 norm, OnRaycastHit onHit)
         {
@@ -158,7 +158,7 @@ namespace Terrain
         }
 
         
-        public void changeSurface(){
+        public void ChangeSurface(){
             //surfaceGameObjects.Clear();
             if(myDrop.value == 0) index = 0;
             else if (myDrop.value == 1) index = 1;
@@ -173,8 +173,6 @@ namespace Terrain
                 //gameObj.tag = Constants.Tags.TerrainSurface;
                 gameObj.GetComponent<MeshRenderer>().sharedMaterial = surfaceMaterials[index];
             }
-            
-            
         }
 
         private  PlanetSurface MakePlanetSurface(Vector3 up, int index)

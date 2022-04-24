@@ -137,6 +137,14 @@ namespace Player
             }
         }
 
+        public void AddHealth()
+        {   
+            health = health + 10;
+            if(health > maxHealth)
+            {
+                health = maxHealth;
+            }
+        }
 
         private float CalculateHealth() 
         {

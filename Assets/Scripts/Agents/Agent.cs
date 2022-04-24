@@ -21,11 +21,13 @@ public abstract class Agent : MonoBehaviour
     protected AudioSource AudioSource;
 
     public bool isAttacking => animState.IsTag("Attack");
-    public bool isDead => animState.IsName("Dead");
+    public bool shouldDestroy => animState.IsName("Dead");
 
     public bool isInjured => currentHealth < health;
 
     protected bool canAttack => animState.IsTag("Idle") && !anim.IsInTransition(0);
+
+    private bool isAlive = true;
 
     protected void Init()
     {
@@ -39,7 +41,7 @@ public abstract class Agent : MonoBehaviour
         anim.SetTrigger(AttackTrigger);
     }
 
-    protected virtual void HitDetection(Collision collision)
+    protected void HitDetection(Collision collision)
     {
         var agent = collision.gameObject.GetComponent<Agent>();
         var weapon = collision.GetContact(0).otherCollider;
@@ -48,6 +50,8 @@ public abstract class Agent : MonoBehaviour
         if (!agent.isAttacking)
             return;
         if (agent.damageDealt)
+            return;
+        if (!isAlive)
             return;
 
         Debug.Log($"{gameObject.name} hit by {weapon.name}, health -= {agent.attackDamage}");
@@ -65,6 +69,8 @@ public abstract class Agent : MonoBehaviour
 
     protected virtual void Die()
     {
+        if (!isAlive) return;
+        isAlive = false;
         anim.SetTrigger(DieTrigger);
     }
 }

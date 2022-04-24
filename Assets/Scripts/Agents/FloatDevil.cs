@@ -20,21 +20,19 @@ public class FloatDevil : ComputerAgent
     protected override Animator anim => GetComponentInChildren<Animator>();
     
     private NavMeshAgent navMeshAgent;
-    private AudioSource audioSource;
 
     protected void Start()
     {
         Init();
         slider.value = currentHealth / health;
         navMeshAgent = GetComponent<NavMeshAgent>();
-        audioSource = GetComponent<AudioSource>();
         FacePlayer();
     }
 
     private void Update()
     {
         if (!GameState.instance.playing) return;
-        if (isDead) 
+        if (shouldDestroy) 
         {
             Destroy(gameObject);
             return;

@@ -213,6 +213,7 @@ namespace Player
             base.Die();
             var info = new AudioSourceInfo(AudioActor.Player, AudioAction.Die, TerrainType.All);
             EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(info, AudioSource);
+            EventManager.TriggerEvent<DefeatEvent>();
         }
     }
 }

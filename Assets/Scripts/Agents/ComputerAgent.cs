@@ -33,6 +33,7 @@ public abstract class ComputerAgent : Agent
         base.Die();
         var info = new AudioSourceInfo(AudioActor.ComputerAgent, AudioAction.Die, TerrainType.All);
         EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(info, AudioSource);
+        EventManager.TriggerEvent<AgentDeathEvent, ComputerAgent>(this);
         if (itemDrops != null)
         {
             var sample = itemDrops.Sample();

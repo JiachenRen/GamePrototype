@@ -17,6 +17,7 @@ public abstract class ComputerAgent : Agent
     public GameObject Spawn(Vector3 position, Transform parent)
     {
         var obj = Instantiate(prototype, parent);
+        obj.SetActive(true);
         obj.GetComponent<NavMeshAgent>().Warp(position);
         return obj;
     }
@@ -33,7 +34,7 @@ public abstract class ComputerAgent : Agent
         base.Die();
         var info = new AudioSourceInfo(AudioActor.ComputerAgent, AudioAction.Die, TerrainType.All);
         EventManager.TriggerEvent<AudioEvent, AudioSourceInfo, AudioSource>(info, AudioSource);
-        EventManager.TriggerEvent<AgentDeathEvent, ComputerAgent>(this);
+        EventManager.TriggerEvent<ObjectiveUpdateEvent>();
         if (itemDrops != null)
         {
             var sample = itemDrops.Sample();

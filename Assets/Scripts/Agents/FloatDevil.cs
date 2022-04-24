@@ -1,6 +1,7 @@
 using Audio;
 using EventSystem;
 using EventSystem.Events;
+using Objectives;
 using Terrain;
 using UnityEngine;
 using UnityEngine.AI;
@@ -19,13 +20,13 @@ public class FloatDevil : ComputerAgent
 
     protected override Animator anim => GetComponentInChildren<Animator>();
     
-    private NavMeshAgent navMeshAgent;
+    protected NavMeshAgent NavMeshAgent;
 
     protected void Start()
     {
         Init();
         slider.value = currentHealth / health;
-        navMeshAgent = GetComponent<NavMeshAgent>();
+        NavMeshAgent = GetComponent<NavMeshAgent>();
         FacePlayer();
     }
 
@@ -54,9 +55,9 @@ public class FloatDevil : ComputerAgent
                 Attack();
             }
         }
-        else if (distanceToPlayer < lookRadius && navMeshAgent.isOnNavMesh)
+        else if (distanceToPlayer < lookRadius && NavMeshAgent.isOnNavMesh)
         {
-            navMeshAgent.SetDestination(player.transform.position);
+            NavMeshAgent.SetDestination(player.transform.position);
         }
     }
 
@@ -76,7 +77,7 @@ public class FloatDevil : ComputerAgent
     }
 
     // facing player with smooth rotation
-    private void FacePlayer()
+    protected void FacePlayer()
     {
         var t = transform;
         var position = t.position;

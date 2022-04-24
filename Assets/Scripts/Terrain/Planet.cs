@@ -1,9 +1,12 @@
 using System.Collections.Generic;
+using System.Linq;
 using AQUAS_Lite;
+using EventSystem;
+using EventSystem.Events;
 using Terrain.Surfaces;
+using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.UI;
 
 namespace Terrain
 {
@@ -11,11 +14,13 @@ namespace Terrain
     {
         public delegate void OnRaycastHit(RaycastHit hit);
 
+        public delegate Vector3 Pos();
+
         private static readonly Vector3[] Directions =
             {Vector3.down, Vector3.up, Vector3.forward, Vector3.back, Vector3.left, Vector3.right};
 
-        public TMPro.TMP_Dropdown myDrop;
-        
+        public TMP_Dropdown myDrop;
+
         public float radius = 100;
         public int resolution = 100;
         public float waterLevelOffset;
@@ -27,26 +32,23 @@ namespace Terrain
         public NoiseLayer[] noiseLayers;
 
         public GameObject[] agentPrototypes;
+        private GameObject agentsRoot;
+
+        private int index;
         private List<GameObject> intermediates;
 
-        private GameObject surfacesRoot;
-        private GameObject agentsRoot;
-    
         private List<GameObject> surfaceGameObjects;
 
         private PlanetSurface[] surfaces;
+
+        private GameObject surfacesRoot;
         private UnwalkableSurface[] unwalkableMasks;
         private WaterSurface[] waterSurfaces;
-
-        private int index = 0;
 
         // Start is called before the first frame update
         public void Start()
         {
-            if (Application.isPlaying)
-            {
-                DestroyGeneratedObjects();
-            }
+            if (Application.isPlaying) DestroyGeneratedObjects();
             Initialize();
         }
 
@@ -59,7 +61,10 @@ namespace Terrain
         {
             surfacesRoot = new GameObject("SurfacesRoot");
             surfacesRoot.transform.parent = transform;
-        
+
+            agentsRoot = new GameObject("Agents");
+            agentsRoot.transform.parent = transform;
+
             surfaces = new PlanetSurface[6];
             waterSurfaces = new WaterSurface[6];
             unwalkableMasks = new UnwalkableSurface[6];
@@ -86,30 +91,47 @@ namespace Terrain
                 navMeshSurface.BuildNavMesh();
             }
 
-            SpawnAgents();
-
             // Destroy all intermediates
             foreach (var obj in intermediates)
                 if (!Application.isPlaying)
                     obj.SetActive(false);
+
+            EventManager.TriggerEvent<PlanetInitializedEvent>();
         }
 
-        private void SpawnAgents()
+        public void SpawnAgents(ComputerAgent agent, Pos pos)
         {
-            agentsRoot = new GameObject("Agents");
-            agentsRoot.transform.parent = transform;
-
-            foreach (var agent in agentPrototypes)
+            var computerAgent = agent.GetComponent<ComputerAgent>();
+            for (var i = 0; i < computerAgent.quantity; i++)
             {
-                var computerAgent = agent.GetComponent<ComputerAgent>();
-                for (var i = 0; i < computerAgent.quantity; i++)
-                {
-                    var obj = computerAgent.Spawn(RandomPositionOnNavMesh(0.3f), agentsRoot.transform);
+                var obj = computerAgent.Spawn(pos.Invoke(), agentsRoot.transform);
 
-                    // Make agent subject to planet's gravitational pull.
-                    GetComponent<GravityField>().subjects.Add(obj);
+                // Make agent subject to planet's gravitational pull.
+                GetComponent<GravityField>().subjects.Add(obj);
+            }
+        }
+
+        public List<GameObject> GetAgents()
+        {
+            if (agentsRoot == null) return new List<GameObject>();
+            return (from Transform t in agentsRoot.transform select t.gameObject).ToList();
+        }
+
+        public GameObject GetClosestAgent(Vector3 pos)
+        {
+            var minDist = float.MaxValue;
+            GameObject closest = null;
+            foreach (var agent in GetAgents())
+            {
+                var dist = Vector3.Distance(agent.transform.position, pos);
+                if (dist < minDist)
+                {
+                    minDist = dist;
+                    closest = agent;
                 }
             }
+
+            return closest;
         }
 
         // Get a random position on the planet where land objects can spawn.
@@ -134,11 +156,11 @@ namespace Terrain
             return (pos - transform.position).magnitude > radius + waterLevelOffset;
         }
 
-        public bool WaterTooDeep(Transform playerTrans) 
+        public bool WaterTooDeep(Transform playerTrans)
         {
-            return (playerTrans.position - transform.position + playerTrans.up).magnitude <= (radius + waterLevelOffset);
+            return (playerTrans.position - transform.position + playerTrans.up).magnitude <= radius + waterLevelOffset;
         }
-        
+
         // Raycast from (point in space by extending from planet center in direction of norm) to planet center.
         public void RaycastToSurface(Vector3 norm, OnRaycastHit onHit)
         {
@@ -157,10 +179,11 @@ namespace Terrain
             return gameObj;
         }
 
-        
-        public void ChangeSurface(){
+
+        public void ChangeSurface()
+        {
             //surfaceGameObjects.Clear();
-            if(myDrop.value == 0) index = 0;
+            if (myDrop.value == 0) index = 0;
             else if (myDrop.value == 1) index = 1;
             else if (myDrop.value == 2) index = 2;
             // var i = 0;
@@ -169,13 +192,11 @@ namespace Terrain
             //     surfaces[i] = MakePlanetSurface(dir, index); 
             //     i++;
             // }
-            foreach(var gameObj in surfaceGameObjects){
-                //gameObj.tag = Constants.Tags.TerrainSurface;
+            foreach (var gameObj in surfaceGameObjects) //gameObj.tag = Constants.Tags.TerrainSurface;
                 gameObj.GetComponent<MeshRenderer>().sharedMaterial = surfaceMaterials[index];
-            }
         }
 
-        private  PlanetSurface MakePlanetSurface(Vector3 up, int index)
+        private PlanetSurface MakePlanetSurface(Vector3 up, int index)
         {
             var gameObj = GenerateSurfaceGameObject("Surface", up);
             gameObj.tag = Constants.Tags.TerrainSurface;

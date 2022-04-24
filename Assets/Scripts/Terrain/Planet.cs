@@ -215,7 +215,7 @@ namespace Terrain
             var surface = new WaterSurface(resolution, radius + waterLevelOffset, up);
             surface.GenerateMesh();
             gameObj.GetComponent<MeshFilter>().sharedMesh = surface.mesh;
-            gameObj.AddComponent<AQUAS_Lite_Reflection>().ignoreOcclusionCulling = true;
+            gameObj.AddComponent<AQUAS_Lite_Reflection>().ignoreOcclusionCulling = false;
             var probe = gameObj.AddComponent<ReflectionProbe>();
             probe.transform.parent = gameObj.transform;
             return surface;

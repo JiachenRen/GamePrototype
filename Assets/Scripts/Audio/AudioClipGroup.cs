@@ -1,6 +1,4 @@
-﻿
-using EventSystem.Events;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Audio
 {

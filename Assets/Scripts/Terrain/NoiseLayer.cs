@@ -14,14 +14,14 @@ namespace Terrain
         }
 
         public BlendMode blendMode = BlendMode.LayerAndMask;
-        public float frequency = 1;
-        public float amplitude = 1;
-        public Vector3 offset;
-
+        
         [Tooltip("Layer indices must be smaller than or equal to index of this layer.")]
         public int[] maskIndices;
 
         public bool enabled = true;
+        
+        public NoiseConfig noiseConfig;
+        
         private Noise noise;
 
         public NoiseLayer()
@@ -32,7 +32,20 @@ namespace Terrain
         // Evaluate Simplex noise at point.
         public float Eval(Vector3 unitVec)
         {
-            return (noise.Evaluate(unitVec * frequency + offset) + 1) / 2 * amplitude;
+            var noiseVal = 0f;
+            var freq = noiseConfig.baseFrequency;
+            var amp = 1f;
+
+            for (var i = 0; i < noiseConfig.subLayers; i++)
+            {
+                var val = noise.Evaluate(unitVec * freq + noiseConfig.offset);
+                noiseVal += (val + 1) * amp / 2;
+                freq *= noiseConfig.frequency;
+                amp *= noiseConfig.decay;
+            }
+
+            noiseVal = Mathf.Max(0, noiseVal - noiseConfig.threshold);
+            return noiseVal * noiseConfig.scale;
         }
 
         public static float Eval(NoiseLayer[] layers, Vector3 norm)

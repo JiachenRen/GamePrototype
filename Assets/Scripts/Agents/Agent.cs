@@ -29,7 +29,7 @@ public abstract class Agent : MonoBehaviour
 
     private bool isAlive = true;
 
-    protected void Init()
+    protected virtual void Init()
     {
         currentHealth = health;
         AudioSource = GetComponent<AudioSource>();

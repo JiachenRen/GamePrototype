@@ -4,6 +4,7 @@ using EventSystem.Events;
 using Terrain;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(NavMeshAgent))]
 public abstract class ComputerAgent : Agent
@@ -14,6 +15,8 @@ public abstract class ComputerAgent : Agent
     public GameObject prototype;
 
     public PrefabCollection itemDrops;
+
+    public Slider healthBar;
     public GameObject Spawn(Vector3 position, Transform parent)
     {
         var obj = Instantiate(prototype, parent);
@@ -21,7 +24,23 @@ public abstract class ComputerAgent : Agent
         obj.GetComponent<NavMeshAgent>().Warp(position);
         return obj;
     }
+
+    protected override void Init()
+    {
+        base.Init();
+        healthBar.value = currentHealth / health;
+        healthBar.gameObject.SetActive(false);
+    }
     
+    protected void UpdateHealthBar()
+    {
+        healthBar.value = currentHealth / health;
+
+        if (isInjured) {
+            healthBar.gameObject.SetActive(true);
+        }
+    }
+
     protected override void GetHit(Agent attacker)
     {
         base.GetHit(attacker);

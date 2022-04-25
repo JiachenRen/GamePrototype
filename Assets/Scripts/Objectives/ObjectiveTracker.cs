@@ -72,7 +72,10 @@ namespace Objectives
                 // No more objectives
                 EventManager.TriggerEvent<VictoryEvent>();
             }
-            UpdateObjectiveText();
+            else
+            {
+                UpdateObjectiveText();
+            }
         }
 
         private void UpdateObjectiveText()

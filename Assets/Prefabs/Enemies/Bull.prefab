@@ -71,10 +71,9 @@ MonoBehaviour:
   prototype: {fileID: 819443700557322907}
   itemDrops:
     groups: []
+  healthBar: {fileID: 0}
   lookRadius: 20
   attackRadius: 4
-  slider: {fileID: 7261741502351161024}
-  healthBarUI: {fileID: 0}
   player: {fileID: 0}
   planet: {fileID: 0}
 --- !u!54 &819443700557322916
@@ -454,7 +453,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0.5}
   m_SizeDelta: {x: 746, y: 489.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &7645991170929816317

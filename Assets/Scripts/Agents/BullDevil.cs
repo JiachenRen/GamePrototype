@@ -1,11 +1,12 @@
 using System;
+using UnityEditor;
 using UnityEngine;
 
 public class BullDevil : FloatDevil
 {
     private static readonly int Idle = Animator.StringToHash("Idle");
     private DateTime lastTime = DateTime.UtcNow;
-
+    
     private void Update()
     {
         if (!GameState.instance.playing) return;
@@ -14,6 +15,8 @@ public class BullDevil : FloatDevil
             Destroy(gameObject);
             return;
         }
+        
+        UpdateHealthBar();
 
         var distanceToPlayer = Vector3.Distance(player.transform.position, transform.position);
 

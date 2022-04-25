@@ -1,19 +1,10 @@
-using Audio;
-using EventSystem;
-using EventSystem.Events;
-using Objectives;
-using Terrain;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.UI;
 
 public class FloatDevil : ComputerAgent
 {
     public float lookRadius = 10f;
     public float attackRadius = 2f;
-
-    public Slider slider;
-    public GameObject healthBarUI;
 
     public GameObject player;
     public GameObject planet;
@@ -25,7 +16,6 @@ public class FloatDevil : ComputerAgent
     protected void Start()
     {
         Init();
-        slider.value = currentHealth / health;
         NavMeshAgent = GetComponent<NavMeshAgent>();
         FacePlayer();
     }
@@ -39,13 +29,9 @@ public class FloatDevil : ComputerAgent
             return;
         }
         
+        UpdateHealthBar();
+        
         var distanceToPlayer = Vector3.Distance(player.transform.position, transform.position);
-
-        slider.value = currentHealth / health;
-
-        if (isInjured) {
-            healthBarUI.SetActive(true);
-        }
 
         if (distanceToPlayer < attackRadius)
         {

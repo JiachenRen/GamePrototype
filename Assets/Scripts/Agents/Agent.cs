@@ -18,7 +18,8 @@ public abstract class Agent : MonoBehaviour
 
     protected AnimatorStateInfo animState => anim.GetCurrentAnimatorStateInfo(0);
 
-    protected AudioSource AudioSource;
+    [HideInInspector]
+    public AudioSource audioSource;
 
     public bool isAttacking => animState.IsTag("Attack");
     public bool shouldDestroy => animState.IsName("Dead");
@@ -32,7 +33,7 @@ public abstract class Agent : MonoBehaviour
     protected virtual void Init()
     {
         currentHealth = health;
-        AudioSource = GetComponent<AudioSource>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     protected void Attack()

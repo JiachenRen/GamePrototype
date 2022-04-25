@@ -19,7 +19,7 @@ namespace Objectives
 
         public override string GetStatusText()
         {
-            return $"{minion.quantity - minionsKilled}/{minion.quantity} remaining.";
+            return $"{minion.quantity - minionsKilled}/{minion.quantity} remaining";
         }
 
         public override void UpdateObjective()

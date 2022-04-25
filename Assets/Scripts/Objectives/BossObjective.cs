@@ -18,7 +18,7 @@ namespace Objectives
 
         public override string GetStatusText()
         {
-            var enemies = bossKilled ? 1 : 0;
+            var enemies = bossKilled ? 0 : 1;
             return $"{enemies} remaining";
         }
 

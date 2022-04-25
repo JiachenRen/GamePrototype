@@ -8,6 +8,10 @@ public class GameState: MonoBehaviour
     private bool initialized;
 
     public bool playing;
+    
+    public Lighting lighting;
+    
+    public Material surfaceMaterial;
 
     public static GameState instance
     {

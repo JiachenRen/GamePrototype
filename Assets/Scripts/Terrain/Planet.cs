@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AQUAS_Lite;
@@ -7,6 +8,7 @@ using Terrain.Surfaces;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
 namespace Terrain
 {
@@ -18,9 +20,7 @@ namespace Terrain
 
         private static readonly Vector3[] Directions =
             {Vector3.down, Vector3.up, Vector3.forward, Vector3.back, Vector3.left, Vector3.right};
-
-        public TMP_Dropdown myDrop;
-
+        
         public float radius = 100;
         public int resolution = 100;
         public float waterLevelOffset;
@@ -30,11 +30,9 @@ namespace Terrain
         public Material[] waterMaterials;
 
         public NoiseLayer[] noiseLayers;
-
-        public GameObject[] agentPrototypes;
+        
         private GameObject agentsRoot;
-
-        private int index;
+        
         private List<GameObject> intermediates;
 
         private List<GameObject> surfaceGameObjects;
@@ -96,7 +94,14 @@ namespace Terrain
                 if (!Application.isPlaying)
                     obj.SetActive(false);
 
+            UpdateSurfaceMaterial(GameState.instance.surfaceMaterial);
             EventManager.TriggerEvent<PlanetInitializedEvent>();
+            EventManager.StartListening<SurfaceMaterialChangedEvent, Material>(UpdateSurfaceMaterial);
+        }
+
+        private void OnDestroy()
+        {
+            EventManager.StopListening<SurfaceMaterialChangedEvent, Material>(UpdateSurfaceMaterial);
         }
 
         public void SpawnAgents(ComputerAgent agent, Pos pos)
@@ -180,20 +185,10 @@ namespace Terrain
         }
 
 
-        public void ChangeSurface()
+        public void UpdateSurfaceMaterial(Material mat)
         {
-            //surfaceGameObjects.Clear();
-            if (myDrop.value == 0) index = 0;
-            else if (myDrop.value == 1) index = 1;
-            else if (myDrop.value == 2) index = 2;
-            // var i = 0;
-            // foreach (var dir in Directions)
-            // {
-            //     surfaces[i] = MakePlanetSurface(dir, index); 
-            //     i++;
-            // }
-            foreach (var gameObj in surfaceGameObjects) //gameObj.tag = Constants.Tags.TerrainSurface;
-                gameObj.GetComponent<MeshRenderer>().sharedMaterial = surfaceMaterials[index];
+            foreach (var gameObj in surfaceGameObjects)
+                gameObj.GetComponent<MeshRenderer>().sharedMaterial = mat;
         }
 
         private PlanetSurface MakePlanetSurface(Vector3 up, int index)

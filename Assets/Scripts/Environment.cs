@@ -1,24 +1,37 @@
 using System;
 using System.Collections.Generic;
+using EventSystem;
+using EventSystem.Events;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class Environment : RenderInEditor
 {
-    public Lighting lighting = Lighting.Day;
+    private Lighting lighting;
     public GameObject lightsRoot;
     public GameObject player;
-
-    public TMPro.TMP_Dropdown myDrop;
 
     [SerializeField] public EnvConfig[] envConfigs;
 
     private Dictionary<Lighting, EnvConfig> configs;
-
-    // Start is called before the first frame update
+    
     private void Start()
     {
+        lighting = GameState.instance.lighting;
         UpdateEnvironment();
+        
+        EventManager.StartListening<LightingChangedEvent, Lighting>(OnLightingChanged);
+    }
+
+    private void OnLightingChanged(Lighting newLighting)
+    {
+        lighting = newLighting;
+        ApplyLighting();
+    }
+
+    private void OnDestroy()
+    {
+        EventManager.StopListening<LightingChangedEvent, Lighting>(OnLightingChanged);
     }
 
     public void LateUpdate()
@@ -37,12 +50,6 @@ public class Environment : RenderInEditor
 
     public void ApplyLighting()
     {
-        if(myDrop.value == 0) lighting = Lighting.Day;
-        else if (myDrop.value == 1) lighting = Lighting.Night;
-        else if (myDrop.value == 2) lighting = Lighting.Dusk;
-
-        Debug.Log("Applying lighting");
-        
         var config = configs[lighting];
 
         // First deactivate all lights
@@ -60,8 +67,6 @@ public class Environment : RenderInEditor
     {
         configs = new Dictionary<Lighting, EnvConfig>();
         
-
-
         foreach (var config in envConfigs) configs.Add(config.lighting, config);
 
         ApplyLighting();

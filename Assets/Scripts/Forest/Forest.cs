@@ -1,5 +1,3 @@
-using UnityEditor;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public abstract class Forest : RenderInEditor
@@ -38,6 +36,8 @@ public abstract class Forest : RenderInEditor
         var newTree = Instantiate(tree, position, rotation);
         newTree.AddComponent<MeshCollider>();
         newTree.transform.parent = root.transform;
+        // Bury underground 0.1 M.
+        newTree.transform.position += newTree.transform.up * -0.1f;
         var material = newTree.GetComponent<MeshRenderer>().sharedMaterial;
         material.shader = useWind ? wind.shader : Shader.Find("Standard");
         newTree.layer = Constants.Layers.TerrainDetail;
